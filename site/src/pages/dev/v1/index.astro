@@ -1,0 +1,1633 @@
+---
+import { tours, categories, about, contacts } from '../../../data/tours';
+
+const toursByCategory = categories.map(cat => ({
+  ...cat,
+  tours: tours.filter(t => t.category === cat.id),
+}));
+---
+
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Маша Шишкова — Лицензированный гид по Амальфитанскому побережью</title>
+  <meta name="description" content="Авторские экскурсии по Неаполю, Помпеям, Геркулануму и Амальфитанскому побережью. Лицензированный гид Маша Шишкова." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- ========== NAVIGATION ========== -->
+<nav class="nav" id="nav">
+  <div class="nav__inner">
+    <a href="#hero" class="nav__logo">МШ</a>
+    <button class="nav__toggle" aria-label="Меню" id="navToggle">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav__links" id="navLinks">
+      <li><a href="#about">О себе</a></li>
+      <li><a href="#tours">Экскурсии</a></li>
+      <li><a href="#contact">Контакты</a></li>
+      <li><a href="#form" class="nav__cta">Записаться</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ========== HERO ========== -->
+<section class="hero" id="hero">
+  <div class="hero__gallery">
+    <div class="hero__slide hero__slide--1"></div>
+    <div class="hero__slide hero__slide--2"></div>
+    <div class="hero__slide hero__slide--3"></div>
+    <div class="hero__slide hero__slide--4"></div>
+    <div class="hero__slide hero__slide--5"></div>
+  </div>
+  <div class="hero__overlay"></div>
+  <div class="hero__content">
+    <div class="hero__ornament">&#10022;</div>
+    <h1 class="hero__title">Маша Шишкова</h1>
+    <p class="hero__handle">/masha_italianskii_cocktail/</p>
+    <div class="hero__divider">
+      <span class="hero__divider-line"></span>
+      <span class="hero__divider-diamond">&#9830;</span>
+      <span class="hero__divider-line"></span>
+    </div>
+    <p class="hero__subtitle">Лицензированный гид<br />по Амальфитанскому побережью</p>
+    <p class="hero__tagline">Неаполь &middot; Помпеи &middot; Амальфи &middot; Капри</p>
+    <a href="#tours" class="hero__cta">Выбрать экскурсию</a>
+  </div>
+  <div class="hero__scroll-hint">
+    <span>&#8595;</span>
+  </div>
+</section>
+
+<!-- ========== ABOUT ========== -->
+<section class="about" id="about">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-header__ornament">&#10022;</span>
+      <h2 class="section-header__title">О вашем гиде</h2>
+      <div class="section-header__rule"></div>
+    </div>
+    <div class="about__grid">
+      <div class="about__portrait">
+        <div class="about__portrait-frame">
+          <img src="/images/masha.jpg" alt="Маша Шишкова" class="about__photo" />
+        </div>
+      </div>
+      <div class="about__text">
+        <h3 class="about__name">{about.name}</h3>
+        <p class="about__title-role">{about.title}</p>
+        {about.bio.map((paragraph) => (
+          <p class="about__bio">{paragraph}</p>
+        ))}
+        <div class="about__credentials">
+          <div class="about__credential">
+            <span class="about__credential-icon">&#127891;</span>
+            <span>{about.education}</span>
+          </div>
+          <div class="about__credential">
+            <span class="about__credential-icon">&#128205;</span>
+            <span>{about.location}</span>
+          </div>
+          <div class="about__credential">
+            <span class="about__credential-icon">&#128220;</span>
+            <span>Лицензия Regione Campania</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== TOURS ========== -->
+<section class="tours" id="tours">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-header__ornament">&#10022;</span>
+      <h2 class="section-header__title">Экскурсии и туры</h2>
+      <div class="section-header__rule"></div>
+      <p class="section-header__subtitle">Авторские маршруты по самым красивым местам Кампании</p>
+    </div>
+
+    {toursByCategory.map((cat) => (
+      <div class="tour-category" id={`cat-${cat.id}`}>
+        <h3 class="tour-category__title">
+          <span class="tour-category__emoji">{cat.emoji}</span>
+          {cat.name}
+        </h3>
+        <div class="tour-category__grid">
+          {cat.tours.map((tour) => (
+            <article class="tour-card">
+              {tour.image && (
+                <div class="tour-card__image-wrap">
+                  <img src={tour.image} alt={tour.title} class="tour-card__image" loading="lazy" />
+                </div>
+              )}
+              <div class="tour-card__header">
+                <h4 class="tour-card__title">{tour.title}</h4>
+                <p class="tour-card__subtitle">{tour.subtitle}</p>
+              </div>
+              <div class="tour-card__body">
+                <p class="tour-card__description">{tour.description}</p>
+                {tour.details && (
+                  <ul class="tour-card__details">
+                    {tour.details.map((d) => (
+                      <li>{d}</li>
+                    ))}
+                  </ul>
+                )}
+                {tour.extras && (
+                  <p class="tour-card__extras">{tour.extras}</p>
+                )}
+              </div>
+              <div class="tour-card__footer">
+                <div class="tour-card__meta">
+                  <span class="tour-card__duration">&#9202; {tour.duration}</span>
+                  {tour.maxPeople && <span class="tour-card__people">&#128101; {tour.maxPeople}</span>}
+                </div>
+                <div class="tour-card__price">{tour.price}</div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<!-- ========== CONTACT ========== -->
+<section class="contact" id="contact">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-header__ornament">&#10022;</span>
+      <h2 class="section-header__title">Связаться со мной</h2>
+      <div class="section-header__rule"></div>
+    </div>
+    <div class="contact__grid">
+      <a href={contacts.telegram} target="_blank" rel="noopener" class="contact__card">
+        <div class="contact__icon">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        </div>
+        <span class="contact__label">Telegram</span>
+        <span class="contact__value">{contacts.telegramName}</span>
+      </a>
+      <a href={contacts.instagram} target="_blank" rel="noopener" class="contact__card">
+        <div class="contact__icon">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32"><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 1 0 0-12.324zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405a1.441 1.441 0 1 1-2.882 0 1.441 1.441 0 0 1 2.882 0z"/></svg>
+        </div>
+        <span class="contact__label">Instagram</span>
+        <span class="contact__value">@masha_italianskii_cocktail</span>
+      </a>
+      <a href={contacts.facebook} target="_blank" rel="noopener" class="contact__card">
+        <div class="contact__icon">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </div>
+        <span class="contact__label">Facebook</span>
+        <span class="contact__value">masha.shishkova</span>
+      </a>
+      <a href={`mailto:${contacts.email}`} class="contact__card">
+        <div class="contact__icon">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32"><path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67z"/><path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908z"/></svg>
+        </div>
+        <span class="contact__label">Email</span>
+        <span class="contact__value">{contacts.email}</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FORM ========== -->
+<section class="form-section" id="form">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-header__ornament">&#10022;</span>
+      <h2 class="section-header__title">Записаться на экскурсию</h2>
+      <div class="section-header__rule"></div>
+      <p class="section-header__subtitle">Заполните форму и я свяжусь с вами в течение 24 часов</p>
+    </div>
+    <form class="booking-form" action="#" method="POST">
+      <div class="booking-form__grid">
+        <div class="booking-form__field">
+          <label for="name">Имя</label>
+          <input type="text" id="name" name="name" placeholder="Ваше имя" required />
+        </div>
+        <div class="booking-form__field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="your@email.com" required />
+        </div>
+        <div class="booking-form__field booking-form__field--full">
+          <label for="tour">Предпочтительная экскурсия</label>
+          <select id="tour" name="tour">
+            <option value="">Выберите экскурсию...</option>
+            {tours.map((tour) => (
+              <option value={tour.id}>{tour.title} — {tour.price}</option>
+            ))}
+          </select>
+        </div>
+        <div class="booking-form__field booking-form__field--full">
+          <label for="message">Сообщение</label>
+          <textarea id="message" name="message" rows="5" placeholder="Расскажите о ваших пожеланиях: даты, количество человек, особые интересы..."></textarea>
+        </div>
+      </div>
+      <button type="submit" class="booking-form__submit">Отправить заявку</button>
+    </form>
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <span class="footer__logo">МШ</span>
+        <p class="footer__tagline">{about.tagline}</p>
+      </div>
+      <div class="footer__social">
+        <a href={contacts.telegram} target="_blank" rel="noopener" aria-label="Telegram" class="footer__social-link">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        </a>
+        <a href={contacts.instagram} target="_blank" rel="noopener" aria-label="Instagram" class="footer__social-link">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 1 0 0-12.324zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405a1.441 1.441 0 1 1-2.882 0 1.441 1.441 0 0 1 2.882 0z"/></svg>
+        </a>
+        <a href={contacts.facebook} target="_blank" rel="noopener" aria-label="Facebook" class="footer__social-link">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </a>
+        <a href={`mailto:${contacts.email}`} aria-label="Email" class="footer__social-link">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67z"/><path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908z"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="footer__divider"></div>
+    <div class="footer__bottom">
+      <div class="footer__legal">
+        <p>Гид с лицензией Regione Campania / Guida turistica abilitata, Regione Campania n. XXXX</p>
+        <p>P.IVA: IT00000000000</p>
+        <p class="footer__legal-links">
+          <a href="#">Cookie Policy / Informativa sui Cookie</a>
+          <span>&middot;</span>
+          <a href="#">Privacy Policy / Informativa sulla Privacy</a>
+        </p>
+      </div>
+      <p class="footer__copyright">&copy; 2024&ndash;2026 {about.name}. Все права защищены / Tutti i diritti riservati.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Mobile nav toggle
+  document.getElementById('navToggle')?.addEventListener('click', () => {
+    document.getElementById('navLinks')?.classList.toggle('nav__links--open');
+    document.getElementById('navToggle')?.classList.toggle('nav__toggle--open');
+  });
+
+  // Close mobile nav on link click
+  document.querySelectorAll('.nav__links a').forEach(link => {
+    link.addEventListener('click', () => {
+      document.getElementById('navLinks')?.classList.remove('nav__links--open');
+      document.getElementById('navToggle')?.classList.remove('nav__toggle--open');
+    });
+  });
+
+  // Sticky nav background on scroll
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 80) {
+      nav?.classList.add('nav--scrolled');
+    } else {
+      nav?.classList.remove('nav--scrolled');
+    }
+  });
+
+  // Scroll-triggered reveal animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+
+  document.querySelectorAll('.tour-card, .contact__card, .about__text, .about__portrait, .tour-category__title, .section-header').forEach(el => {
+    el.classList.add('reveal');
+    observer.observe(el);
+  });
+</script>
+
+<style>
+  /* ===================================================
+     CSS CUSTOM PROPERTIES
+     =================================================== */
+  :root {
+    --color-bg-primary: #0a0a0a;
+    --color-bg-secondary: #111111;
+    --color-bg-tertiary: #1a1a1a;
+    --color-bg-card: #141414;
+    --color-bg-card-hover: #1c1c1c;
+
+    --color-gold: #d4af37;
+    --color-gold-dark: #c5a028;
+    --color-gold-light: #e8d48b;
+    --color-gold-pale: #f5ecd0;
+    --color-gold-glow: rgba(212, 175, 55, 0.15);
+
+    --color-burgundy: #5c1a2a;
+    --color-burgundy-deep: #3d1018;
+    --color-burgundy-glow: rgba(92, 26, 42, 0.3);
+
+    --color-text-primary: #e8e0d0;
+    --color-text-secondary: #a89e8c;
+    --color-text-muted: #6b6356;
+
+    --color-border: rgba(212, 175, 55, 0.15);
+    --color-border-strong: rgba(212, 175, 55, 0.3);
+
+    --font-heading: 'Cormorant Garamond', 'Georgia', serif;
+    --font-body: 'EB Garamond', 'Georgia', serif;
+
+    --space-xs: 0.5rem;
+    --space-sm: 1rem;
+    --space-md: 2rem;
+    --space-lg: 4rem;
+    --space-xl: 6rem;
+    --space-2xl: 8rem;
+
+    --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --container-width: 1200px;
+    --nav-height: 72px;
+  }
+
+  /* ===================================================
+     RESET & BASE
+     =================================================== */
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: var(--nav-height);
+  }
+
+  body {
+    font-family: var(--font-body);
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  /* Subtle noise texture overlay on body */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  a {
+    color: var(--color-gold);
+    text-decoration: none;
+    transition: color var(--transition-base);
+  }
+
+  a:hover {
+    color: var(--color-gold-light);
+  }
+
+  img {
+    max-width: 100%;
+    display: block;
+  }
+
+  .container {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 var(--space-md);
+  }
+
+  /* ===================================================
+     REVEAL ANIMATIONS
+     =================================================== */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Staggered card reveals */
+  .tour-card.reveal:nth-child(1) { transition-delay: 0s; }
+  .tour-card.reveal:nth-child(2) { transition-delay: 0.1s; }
+  .tour-card.reveal:nth-child(3) { transition-delay: 0.2s; }
+  .tour-card.reveal:nth-child(4) { transition-delay: 0.3s; }
+  .tour-card.reveal:nth-child(5) { transition-delay: 0.4s; }
+  .tour-card.reveal:nth-child(6) { transition-delay: 0.5s; }
+  .tour-card.reveal:nth-child(7) { transition-delay: 0.6s; }
+  .tour-card.reveal:nth-child(8) { transition-delay: 0.7s; }
+
+  .contact__card.reveal:nth-child(1) { transition-delay: 0s; }
+  .contact__card.reveal:nth-child(2) { transition-delay: 0.12s; }
+  .contact__card.reveal:nth-child(3) { transition-delay: 0.24s; }
+  .contact__card.reveal:nth-child(4) { transition-delay: 0.36s; }
+
+  /* ===================================================
+     SECTION HEADER
+     =================================================== */
+  .section-header {
+    text-align: center;
+    margin-bottom: var(--space-lg);
+  }
+
+  .section-header__ornament {
+    display: block;
+    font-size: 1.5rem;
+    color: var(--color-gold);
+    margin-bottom: var(--space-sm);
+    opacity: 0.7;
+  }
+
+  .section-header__title {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 300;
+    color: var(--color-gold);
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+  }
+
+  .section-header__rule {
+    width: 80px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+    margin: var(--space-sm) auto;
+  }
+
+  .section-header__subtitle {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    color: var(--color-text-secondary);
+    font-style: italic;
+    margin-top: var(--space-xs);
+  }
+
+  /* ===================================================
+     NAVIGATION
+     =================================================== */
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    height: var(--nav-height);
+    transition: background var(--transition-base), box-shadow var(--transition-base), backdrop-filter var(--transition-base);
+  }
+
+  .nav--scrolled {
+    background: rgba(10, 10, 10, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 1px 0 var(--color-border);
+  }
+
+  .nav__inner {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 var(--space-md);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav__logo {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--color-gold) !important;
+    letter-spacing: 0.15em;
+    position: relative;
+  }
+
+  .nav__logo::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--color-gold);
+    opacity: 0.4;
+  }
+
+  .nav__links {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    list-style: none;
+  }
+
+  .nav__links a {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    position: relative;
+    padding: 4px 0;
+  }
+
+  .nav__links a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--color-gold);
+    transition: width var(--transition-base);
+  }
+
+  .nav__links a:hover {
+    color: var(--color-gold-light);
+  }
+
+  .nav__links a:hover::after {
+    width: 100%;
+  }
+
+  .nav__cta {
+    border: 1px solid var(--color-gold) !important;
+    padding: 8px 20px !important;
+    color: var(--color-gold) !important;
+    transition: all var(--transition-base) !important;
+  }
+
+  .nav__cta:hover {
+    background: var(--color-gold) !important;
+    color: var(--color-bg-primary) !important;
+  }
+
+  .nav__cta::after {
+    display: none !important;
+  }
+
+  /* Mobile toggle */
+  .nav__toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .nav__toggle span {
+    display: block;
+    width: 24px;
+    height: 1.5px;
+    background: var(--color-gold);
+    transition: all var(--transition-base);
+    transform-origin: center;
+  }
+
+  .nav__toggle--open span:nth-child(1) {
+    transform: rotate(45deg) translate(4.5px, 4.5px);
+  }
+  .nav__toggle--open span:nth-child(2) {
+    opacity: 0;
+  }
+  .nav__toggle--open span:nth-child(3) {
+    transform: rotate(-45deg) translate(4.5px, -4.5px);
+  }
+
+  /* ===================================================
+     HERO
+     =================================================== */
+  .hero {
+    position: relative;
+    height: 100vh;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .hero__gallery {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hero__slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    animation: heroFade 25s infinite;
+    background-size: cover;
+    background-position: center;
+  }
+
+  /* Slide 1: Warm Amalfi sunset over the sea */
+  .hero__slide--1 {
+    background:
+      radial-gradient(ellipse at 30% 80%, rgba(212, 175, 55, 0.2) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 20%, rgba(92, 26, 42, 0.4) 0%, transparent 60%),
+      linear-gradient(175deg,
+        #1a0a0a 0%,
+        #2d1520 15%,
+        #5c1a2a 30%,
+        #8b3a1a 45%,
+        #d4af37 55%,
+        #e8d48b 60%,
+        #4a7c8a 70%,
+        #1a3a4a 85%,
+        #0a1520 100%
+      );
+    animation-delay: 0s;
+  }
+
+  /* Slide 2: Deep blue Mediterranean with golden light */
+  .hero__slide--2 {
+    background:
+      radial-gradient(ellipse at 50% 90%, rgba(212, 175, 55, 0.15) 0%, transparent 40%),
+      radial-gradient(ellipse at 80% 30%, rgba(30, 60, 90, 0.6) 0%, transparent 50%),
+      linear-gradient(170deg,
+        #0a0a1a 0%,
+        #0d1a2d 20%,
+        #1a3a5c 35%,
+        #2a5a7a 48%,
+        #3a7a9a 55%,
+        #1a4a6a 65%,
+        #0d2a4a 78%,
+        #0a1525 90%,
+        #050a10 100%
+      );
+    animation-delay: 5s;
+  }
+
+  /* Slide 3: Ancient stone textures - Pompeii warmth */
+  .hero__slide--3 {
+    background:
+      radial-gradient(ellipse at 40% 50%, rgba(180, 140, 80, 0.3) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 70%, rgba(120, 70, 40, 0.4) 0%, transparent 40%),
+      linear-gradient(160deg,
+        #1a1510 0%,
+        #2d2218 15%,
+        #4a3828 30%,
+        #6b5238 42%,
+        #8b6a40 52%,
+        #a08050 58%,
+        #7a5a35 68%,
+        #4a3520 80%,
+        #1a1510 100%
+      );
+    animation-delay: 10s;
+  }
+
+  /* Slide 4: Lemon grove greens with golden accents */
+  .hero__slide--4 {
+    background:
+      radial-gradient(ellipse at 60% 40%, rgba(180, 200, 60, 0.15) 0%, transparent 40%),
+      radial-gradient(ellipse at 30% 70%, rgba(212, 175, 55, 0.2) 0%, transparent 40%),
+      linear-gradient(165deg,
+        #0a0f08 0%,
+        #142010 18%,
+        #1e3518 32%,
+        #2a4a20 45%,
+        #3a5a28 52%,
+        #4a6a30 56%,
+        #3a5520 65%,
+        #1e3518 78%,
+        #0a1508 90%,
+        #050a04 100%
+      );
+    animation-delay: 15s;
+  }
+
+  /* Slide 5: Twilight violet and rose over coast */
+  .hero__slide--5 {
+    background:
+      radial-gradient(ellipse at 50% 60%, rgba(150, 100, 140, 0.25) 0%, transparent 45%),
+      radial-gradient(ellipse at 20% 30%, rgba(92, 26, 42, 0.3) 0%, transparent 50%),
+      linear-gradient(175deg,
+        #0a0810 0%,
+        #1a1025 18%,
+        #2d1838 30%,
+        #4a2050 42%,
+        #5c2860 48%,
+        #4a2548 55%,
+        #3a1a38 65%,
+        #1a1028 80%,
+        #0a0810 100%
+      );
+    animation-delay: 20s;
+  }
+
+  @keyframes heroFade {
+    0%   { opacity: 0; }
+    4%   { opacity: 1; }
+    20%  { opacity: 1; }
+    24%  { opacity: 0; }
+    100% { opacity: 0; }
+  }
+
+  .hero__overlay {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at center, rgba(10, 10, 10, 0.3) 0%, rgba(10, 10, 10, 0.7) 100%),
+      linear-gradient(180deg, rgba(10, 10, 10, 0.4) 0%, transparent 30%, transparent 70%, rgba(10, 10, 10, 0.8) 100%);
+  }
+
+  .hero__content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 0 var(--space-md);
+    animation: heroContentIn 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    opacity: 0;
+  }
+
+  @keyframes heroContentIn {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .hero__ornament {
+    font-size: 2rem;
+    color: var(--color-gold);
+    opacity: 0.6;
+    margin-bottom: var(--space-sm);
+    animation: heroOrnamentPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes heroOrnamentPulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.1); }
+  }
+
+  .hero__title {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 6vw, 5rem);
+    font-weight: 300;
+    color: var(--color-gold);
+    letter-spacing: 0.08em;
+    line-height: 1.1;
+    text-shadow: 0 2px 40px rgba(212, 175, 55, 0.3);
+  }
+
+  .hero__handle {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    color: rgba(212, 175, 55, 0.55);
+    font-style: italic;
+    margin-top: 0.5rem;
+  }
+
+  .hero__divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin: var(--space-md) 0;
+  }
+
+  .hero__divider-line {
+    display: block;
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-gold));
+  }
+
+  .hero__divider-line:last-child {
+    background: linear-gradient(90deg, var(--color-gold), transparent);
+  }
+
+  .hero__divider-diamond {
+    color: var(--color-gold);
+    font-size: 0.8rem;
+    opacity: 0.7;
+  }
+
+  .hero__subtitle {
+    font-family: var(--font-heading);
+    font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+    font-weight: 300;
+    color: var(--color-text-primary);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1.6;
+  }
+
+  .hero__tagline {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.2em;
+    margin-top: var(--space-xs);
+    font-style: italic;
+  }
+
+  .hero__cta {
+    display: inline-block;
+    margin-top: var(--space-lg);
+    padding: 16px 48px;
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-bg-primary);
+    background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+    border: none;
+    position: relative;
+    overflow: hidden;
+    transition: all var(--transition-base);
+  }
+
+  .hero__cta::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--color-gold-light), var(--color-gold));
+    opacity: 0;
+    transition: opacity var(--transition-base);
+  }
+
+  .hero__cta:hover {
+    color: var(--color-bg-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(212, 175, 55, 0.3);
+  }
+
+  .hero__cta:hover::before {
+    opacity: 1;
+  }
+
+  .hero__cta span,
+  .hero__cta {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero__scroll-hint {
+    position: absolute;
+    bottom: var(--space-md);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    animation: scrollBounce 2s ease-in-out infinite;
+  }
+
+  .hero__scroll-hint span {
+    font-size: 1.5rem;
+    color: var(--color-gold);
+    opacity: 0.5;
+  }
+
+  @keyframes scrollBounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+  }
+
+  /* ===================================================
+     ABOUT
+     =================================================== */
+  .about {
+    padding: var(--space-2xl) 0;
+    background: var(--color-bg-secondary);
+    position: relative;
+  }
+
+  .about::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-border-strong), transparent);
+  }
+
+  .about__grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: var(--space-lg);
+    align-items: start;
+  }
+
+  .about__portrait-frame {
+    aspect-ratio: 3 / 4;
+    border: 1px solid var(--color-border-strong);
+    padding: 8px;
+    position: relative;
+  }
+
+  .about__portrait-frame::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 1px solid var(--color-border);
+  }
+
+  .about__photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .about__name {
+    font-family: var(--font-heading);
+    font-size: 2.4rem;
+    font-weight: 400;
+    color: var(--color-gold);
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+
+  .about__title-role {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 400;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .about__bio {
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-sm);
+    font-size: 1.05rem;
+  }
+
+  .about__bio:last-of-type {
+    margin-bottom: var(--space-md);
+  }
+
+  .about__credentials {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .about__credential {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+  }
+
+  .about__credential-icon {
+    font-size: 1.2rem;
+    min-width: 24px;
+  }
+
+  /* ===================================================
+     TOURS
+     =================================================== */
+  .tours {
+    padding: var(--space-2xl) 0;
+    background: var(--color-bg-primary);
+    position: relative;
+  }
+
+  .tour-category {
+    margin-bottom: var(--space-xl);
+  }
+
+  .tour-category:last-child {
+    margin-bottom: 0;
+  }
+
+  .tour-category__title {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: var(--color-gold);
+    letter-spacing: 0.06em;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .tour-category__emoji {
+    font-size: 1.4rem;
+  }
+
+  .tour-category__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  /* ===================================================
+     TOUR CARD
+     =================================================== */
+  .tour-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* --- Tour Card Image (Museum Frame) --- */
+  .tour-card__image-wrap {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    border-bottom: 2px solid var(--color-border);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+    /* Double border frame effect */
+    outline: 1px solid rgba(212, 175, 55, 0.25);
+    outline-offset: -6px;
+  }
+
+  .tour-card__image-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .tour-card__image-wrap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(212, 175, 55, 0) 0%, rgba(212, 175, 55, 0.15) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .tour-card:hover .tour-card__image-wrap::after {
+    opacity: 1;
+  }
+
+  .tour-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s ease;
+  }
+
+  .tour-card:hover .tour-card__image {
+    transform: scale(1.06);
+  }
+
+  .tour-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+  }
+
+  .tour-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 60%, var(--color-gold-glow) 100%);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    pointer-events: none;
+  }
+
+  .tour-card:hover {
+    border-color: var(--color-border-strong);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--color-border);
+  }
+
+  .tour-card:hover::before,
+  .tour-card:hover::after {
+    opacity: 1;
+  }
+
+  .tour-card__header {
+    padding: var(--space-md) var(--space-md) var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .tour-card__title {
+    font-family: var(--font-heading);
+    font-size: 1.45rem;
+    font-weight: 500;
+    color: var(--color-gold);
+    letter-spacing: 0.03em;
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+
+  .tour-card__subtitle {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+    font-style: italic;
+  }
+
+  .tour-card__body {
+    padding: var(--space-sm) var(--space-md);
+    flex: 1;
+  }
+
+  .tour-card__description {
+    font-size: 0.98rem;
+    color: var(--color-text-primary);
+    line-height: 1.65;
+  }
+
+  .tour-card__details {
+    margin-top: var(--space-sm);
+    padding-left: var(--space-sm);
+    list-style: none;
+  }
+
+  .tour-card__details li {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    padding: 2px 0;
+    position: relative;
+    padding-left: var(--space-sm);
+  }
+
+  .tour-card__details li::before {
+    content: '\2022';
+    position: absolute;
+    left: 0;
+    color: var(--color-gold);
+    opacity: 0.6;
+  }
+
+  .tour-card__extras {
+    margin-top: var(--space-sm);
+    font-size: 0.9rem;
+    color: var(--color-gold-light);
+    font-style: italic;
+    opacity: 0.8;
+  }
+
+  .tour-card__footer {
+    padding: var(--space-sm) var(--space-md) var(--space-md);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: var(--space-sm);
+    position: relative;
+    z-index: 1;
+  }
+
+  .tour-card__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .tour-card__duration,
+  .tour-card__people {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    letter-spacing: 0.02em;
+  }
+
+  .tour-card__price {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-gold);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  /* ===================================================
+     CONTACT
+     =================================================== */
+  .contact {
+    padding: var(--space-2xl) 0;
+    background: var(--color-bg-secondary);
+    position: relative;
+  }
+
+  .contact::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-border-strong), transparent);
+  }
+
+  .contact__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .contact__card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--space-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-card);
+    transition: all var(--transition-base);
+    gap: var(--space-xs);
+  }
+
+  .contact__card:hover {
+    border-color: var(--color-gold);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(212, 175, 55, 0.1);
+    color: var(--color-gold-light);
+  }
+
+  .contact__icon {
+    color: var(--color-gold);
+    transition: transform var(--transition-base);
+  }
+
+  .contact__card:hover .contact__icon {
+    transform: scale(1.15);
+  }
+
+  .contact__label {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-gold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .contact__value {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    word-break: break-all;
+  }
+
+  /* ===================================================
+     FORM
+     =================================================== */
+  .form-section {
+    padding: var(--space-2xl) 0;
+    background: var(--color-bg-primary);
+    position: relative;
+  }
+
+  .booking-form {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .booking-form__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+  }
+
+  .booking-form__field--full {
+    grid-column: 1 / -1;
+  }
+
+  .booking-form__field label {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-gold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-xs);
+  }
+
+  .booking-form__field input,
+  .booking-form__field select,
+  .booking-form__field textarea {
+    width: 100%;
+    padding: 14px 18px;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--color-text-primary);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    outline: none;
+    transition: all var(--transition-base);
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .booking-form__field input::placeholder,
+  .booking-form__field textarea::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  .booking-form__field input:focus,
+  .booking-form__field select:focus,
+  .booking-form__field textarea:focus {
+    border-color: var(--color-gold);
+    box-shadow: 0 0 0 2px var(--color-gold-glow);
+  }
+
+  .booking-form__field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23d4af37' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+    cursor: pointer;
+  }
+
+  .booking-form__field textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  .booking-form__submit {
+    display: block;
+    width: 100%;
+    margin-top: var(--space-md);
+    padding: 18px;
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-bg-primary);
+    background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .booking-form__submit::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--color-gold-light), var(--color-gold));
+    opacity: 0;
+    transition: opacity var(--transition-base);
+  }
+
+  .booking-form__submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(212, 175, 55, 0.3);
+  }
+
+  .booking-form__submit:hover::before {
+    opacity: 1;
+  }
+
+  .booking-form__submit:active {
+    transform: translateY(0);
+  }
+
+  /* ===================================================
+     FOOTER
+     =================================================== */
+  .footer {
+    padding: var(--space-lg) 0 var(--space-md);
+    background: var(--color-bg-tertiary);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .footer__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+  }
+
+  .footer__brand {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .footer__logo {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--color-gold);
+    letter-spacing: 0.15em;
+  }
+
+  .footer__tagline {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    max-width: 400px;
+  }
+
+  .footer__social {
+    display: flex;
+    gap: var(--space-sm);
+  }
+
+  .footer__social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    transition: all var(--transition-base);
+  }
+
+  .footer__social-link:hover {
+    border-color: var(--color-gold);
+    color: var(--color-gold);
+    transform: translateY(-2px);
+  }
+
+  .footer__divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-border-strong), transparent);
+    margin: var(--space-md) 0;
+  }
+
+  .footer__bottom {
+    text-align: center;
+  }
+
+  .footer__legal {
+    margin-bottom: var(--space-sm);
+  }
+
+  .footer__legal p {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    line-height: 1.8;
+  }
+
+  .footer__legal-links {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+  }
+
+  .footer__legal-links a {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    transition: color var(--transition-base);
+  }
+
+  .footer__legal-links a:hover {
+    color: var(--color-gold);
+  }
+
+  .footer__legal-links span {
+    color: var(--color-text-muted);
+  }
+
+  .footer__copyright {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    margin-top: var(--space-sm);
+    opacity: 0.7;
+  }
+
+  /* ===================================================
+     RESPONSIVE
+     =================================================== */
+  @media (max-width: 900px) {
+    .about__grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-md);
+    }
+
+    .about__portrait {
+      max-width: 260px;
+      margin: 0 auto;
+    }
+
+    .contact__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .tour-category__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .tour-category__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .nav__links {
+      position: fixed;
+      top: var(--nav-height);
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 10, 0.97);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      flex-direction: column;
+      padding: var(--space-md);
+      gap: var(--space-sm);
+      border-bottom: 1px solid var(--color-border);
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+      transition: all var(--transition-base);
+    }
+
+    .nav__links--open {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .nav__toggle {
+      display: flex;
+    }
+
+    .booking-form__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .booking-form__field--full {
+      grid-column: 1;
+    }
+
+    .contact__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .hero__title {
+      font-size: clamp(1.8rem, 8vw, 3rem);
+    }
+
+    .footer__top {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .footer__tagline {
+      text-align: center;
+    }
+  }
+</style>
+
+</body>
+</html>

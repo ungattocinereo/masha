@@ -1,0 +1,61 @@
+---
+---
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Маша Шишкова — Гид по Амальфитанскому побережью</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Cormorant Garamond', serif;
+      background: #0a0a0a;
+      color: #f5f0e8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+    h1 { font-size: clamp(2rem, 5vw, 4rem); font-weight: 400; margin-bottom: 0.5em; letter-spacing: 0.05em; }
+    p { font-size: 1.2rem; opacity: 0.7; margin-bottom: 3rem; }
+    .versions { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; }
+    .versions a {
+      display: block;
+      padding: 2rem 3rem;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      color: #d4af37;
+      text-decoration: none;
+      font-size: 1.1rem;
+      letter-spacing: 0.1em;
+      transition: all 0.3s;
+    }
+    .versions a:hover {
+      background: rgba(212, 175, 55, 0.1);
+      border-color: #d4af37;
+    }
+    .versions a span { display: block; font-size: 0.85rem; opacity: 0.6; margin-top: 0.5rem; color: #f5f0e8; }
+  </style>
+</head>
+<body>
+  <h1>Маша Шишкова</h1>
+  <p>Выберите версию дизайна для просмотра</p>
+  <div class="versions">
+    <a href="/dev/v1/">
+      Версия 1
+      <span>Золотая Классика</span>
+    </a>
+    <a href="/dev/v2/">
+      Версия 2
+      <span>Средиземноморская Свежесть</span>
+    </a>
+    <a href="/dev/v3/">
+      Версия 3
+      <span>Дольче Вита</span>
+    </a>
+  </div>
+</body>
+</html>

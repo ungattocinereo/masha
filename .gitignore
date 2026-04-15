@@ -2,3 +2,10 @@ node_modules
 dist
 .DS_Store
 .astro
+
+# client materials (not public)
+fixes/
+
+# video source originals (too large for git — deployed via rsync)
+/video/
+site/public/video/

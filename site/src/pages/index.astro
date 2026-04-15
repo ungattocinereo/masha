@@ -1,61 +1,2212 @@
 ---
+import { tours, categories, about, contacts } from '../data/tours';
+
+const ruTours = tours.filter(t => t.lang !== 'en');
+const enTours = tours.filter(t => t.lang === 'en');
+
+const visibleCategories = categories.filter(cat =>
+  ruTours.some(t => t.category === cat.id)
+);
+
+const licenseUrl = about.licenseUrl;
+const qrSrc = '/images/ministry-qr.svg';
+
+// ============ Inline Lucide SVG icons ============
+// Icons use stroke="currentColor" by default; CSS applies gradient via stroke url.
+const ICON_ATTRS = 'xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+
+const ICONS: Record<string, string> = {
+  'mountain':       `<svg ${ICON_ATTRS}><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg>`,
+  'castle':         `<svg ${ICON_ATTRS}><path d="M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"/><path d="M18 11V4H6v7"/><path d="M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"/><path d="M22 11V9"/><path d="M2 11V9"/><path d="M6 4V2"/><path d="M18 4V2"/><path d="M10 4V2"/><path d="M14 4V2"/></svg>`,
+  'waves':          `<svg ${ICON_ATTRS}><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>`,
+  'puzzle':         `<svg ${ICON_ATTRS}><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.501 2.501 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704L4.23 8.77c.24-.24.581-.353.917-.303.515.077.877.528 1.073 1.01a2.5 2.5 0 1 0 3.259-3.259c-.482-.196-.933-.558-1.01-1.073-.05-.336.062-.676.303-.917l1.609-1.61a2.402 2.402 0 0 1 1.704-.707c.617 0 1.234.236 1.704.706l1.568 1.568c.23.23.556.338.877.29.493-.074.84-.504 1.02-.968a2.5 2.5 0 1 1 3.237 3.237c-.464.18-.894.527-.967 1.02Z"/></svg>`,
+  'sailboat':       `<svg ${ICON_ATTRS}><path d="M22 18H2a4 4 0 0 0 4 4h12a4 4 0 0 0 4-4Z"/><path d="M21 14 10 2 3 14h18Z"/><path d="M10 2v16"/></svg>`,
+  'compass':        `<svg ${ICON_ATTRS}><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`,
+  'play-circle':    `<svg ${ICON_ATTRS}><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>`,
+  'sparkles':       `<svg ${ICON_ATTRS}><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>`,
+  'graduation-cap': `<svg ${ICON_ATTRS}><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>`,
+  'map-pin':        `<svg ${ICON_ATTRS}><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>`,
+  'scroll-text':    `<svg ${ICON_ATTRS}><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg>`,
+  'clock':          `<svg ${ICON_ATTRS}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  'users':          `<svg ${ICON_ATTRS}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+  'message-circle': `<svg ${ICON_ATTRS}><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z"/></svg>`,
+  'send':           `<svg ${ICON_ATTRS}><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg>`,
+  'instagram':      `<svg ${ICON_ATTRS}><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>`,
+  'facebook':       `<svg ${ICON_ATTRS}><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>`,
+  'mail':           `<svg ${ICON_ATTRS}><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`,
+  'wallet':         `<svg ${ICON_ATTRS}><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>`,
+  'route':          `<svg ${ICON_ATTRS}><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>`,
+  'book-open':      `<svg ${ICON_ATTRS}><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>`,
+  'heart-handshake':`<svg ${ICON_ATTRS}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66"/><path d="m18 15-2-2"/><path d="m15 18-2-2"/></svg>`,
+  'quote':          `<svg ${ICON_ATTRS}><path d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h3c0 2.5-2 4.5-4.5 4.5"/><path d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h3c0 2.5-2 4.5-4.5 4.5"/></svg>`,
+  'layers':         `<svg ${ICON_ATTRS}><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>`,
+};
+
+const iconSvg = (name: string): string => ICONS[name] || ICONS['sparkles'];
+
+const CATEGORY_GRADIENTS: Record<string, string> = {
+  naples:  'grad-terra-lemon',
+  pompeii: 'grad-azure-terra',
+  amalfi:  'grad-lemon-olive',
+  quests:  'grad-terra-lemon',
+  sea:     'grad-azure-sky',
+  multi:   'grad-azure-terra',
+  couch:   'grad-azure-sky',
+  extra:   'grad-lemon-olive',
+};
+const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'grad-azure-terra';
 ---
-<html lang="ru">
+
+<html lang="ru" data-lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Маша Шишкова — Гид по Амальфитанскому побережью</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Маша Шишкова — лицензированный гид по Кампании</title>
+  <meta name="description" content="Авторские экскурсии по Неаполю, Помпеям, Амальфитанскому побережью, Капри и Пестуму. Лицензия Regione Campania." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Cormorant+Infant:wght@400;500;600;700&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+
+  <!-- GRADIENT DEFS FOR LUCIDE ICONS -->
+  <svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true">
+    <defs>
+      <linearGradient id="grad-azure-terra" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#1a6b8a"/>
+        <stop offset="100%" stop-color="#c4622d"/>
+      </linearGradient>
+      <linearGradient id="grad-lemon-olive" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#d9a441"/>
+        <stop offset="100%" stop-color="#6b7c3e"/>
+      </linearGradient>
+      <linearGradient id="grad-terra-lemon" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#c4622d"/>
+        <stop offset="100%" stop-color="#d9a441"/>
+      </linearGradient>
+      <linearGradient id="grad-azure-sky" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#0d4a5e"/>
+        <stop offset="100%" stop-color="#2b8fad"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <!-- ============ NAV ============ -->
+  <nav class="nav" id="nav">
+    <div class="nav__inner">
+      <a href="#top" class="nav__logo">
+        <span class="nav__logo-name" data-i18n="logo.name">Маша Шишкова</span>
+        <span class="nav__logo-sub" data-i18n="logo.sub">гид в Кампании</span>
+      </a>
+
+      <ul class="nav__links" id="navLinks">
+        <li><a href="#about"   data-i18n="nav.about">Обо мне</a></li>
+        <li><a href="#tours"   data-i18n="nav.tours">Экскурсии</a></li>
+        <li><a href="#couch"   data-i18n="nav.couch">На диване</a></li>
+        <li><a href="#contact" data-i18n="nav.contact">Контакты</a></li>
+        <li><a href="#form" class="nav__cta" data-i18n="nav.book">Записаться</a></li>
+      </ul>
+
+      <div class="lang-switch" id="langToggle" role="group" aria-label="Language">
+        <span class="lang-switch__thumb" aria-hidden="true"></span>
+        <button type="button" class="lang-switch__opt" data-lang="ru" aria-label="Русский">RU</button>
+        <button type="button" class="lang-switch__opt" data-lang="en" aria-label="English">EN</button>
+      </div>
+
+      <button class="nav__toggle" aria-label="Menu" id="navToggle">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="top">
+    <video
+      class="hero__video"
+      autoplay muted loop playsinline
+      preload="metadata"
+      poster="/images/hero-poster.jpg"
+    >
+      <source src="/video/hero.mp4" type="video/mp4" />
+    </video>
+    <div class="hero__overlay"></div>
+
+    <div class="hero__content">
+      <p class="hero__over">
+        <span data-i18n="hero.over1">ЛИЦЕНЗИРОВАННЫЙ ГИД</span>
+        <span data-i18n="hero.over2">в регионе Кампания</span>
+      </p>
+
+      <h1 class="hero__title" data-i18n="hero.name">{about.name}</h1>
+
+      <p class="hero__geo">
+        {about.geo.map((place, i) => (
+          <>
+            {i > 0 && <span class="hero__geo-sep">·</span>}
+            <span data-i18n={`geo.${i}`}>{place}</span>
+          </>
+        ))}
+      </p>
+
+      <p class="hero__tagline" data-i18n="hero.tagline">{about.tagline}</p>
+
+      <div class="hero__actions">
+        <a href="#tours" class="btn btn--primary" data-i18n="hero.cta.primary">Выбрать экскурсию</a>
+        <a href={`https://wa.me/${contacts.whatsappNumber}?text=${encodeURIComponent('Здравствуйте, Маша!')}`}
+           target="_blank" rel="noopener"
+           class="btn btn--outline" data-i18n="hero.cta.secondary">Написать в WhatsApp</a>
+      </div>
+
+      <a class="hero__license" href={licenseUrl} target="_blank" rel="noopener">
+        <img class="hero__license-qr" src={qrSrc} alt="QR" width="56" height="56" data-i18n-alt="hero.license.qrAlt" />
+        <span class="hero__license-text">
+          <span class="hero__license-label" data-i18n="hero.license.label">Лицензия Regione Campania</span>
+          <span class="hero__license-url">portaleprofessioni.ministeroturismo.gov.it</span>
+        </span>
+      </a>
+    </div>
+
+    <a href="#about" class="hero__scroll" aria-label="Scroll" data-i18n-aria="hero.scroll.aria">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+    </a>
+  </section>
+
+  <div class="divider" aria-hidden="true"></div>
+
+  <!-- ============ ABOUT ============ -->
+  <section class="about" id="about">
+    <div class="container">
+      <div class="about__head">
+        <p class="kicker" data-i18n="about.kicker">Обо мне</p>
+        <h2 class="section-title" data-i18n="about.name">{about.name}</h2>
+      </div>
+
+      <div class="about__grid">
+        <!-- POLAROID PHOTO -->
+        <div class="about__photo-area">
+          <div class="polaroid">
+            <span class="polaroid__tape polaroid__tape--left" aria-hidden="true"></span>
+            <span class="polaroid__tape polaroid__tape--right" aria-hidden="true"></span>
+            <div class="polaroid__photo">
+              <img src="/images/masha.jpg" alt={about.name} />
+            </div>
+            <div class="polaroid__caption">
+              <span class="polaroid__name" data-i18n="polaroid.name">Маша Шишкова</span>
+              <span class="polaroid__role" data-i18n="polaroid.role">Лицензированный гид · Санкт-Петербург · Амальфи</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- QUOTE (tagline) -->
+        <div class="about__quote">
+          <span class="about__quote-mark" aria-hidden="true">
+            <span class="icon icon--md" set:html={iconSvg('quote')} />
+          </span>
+          <p class="about__tagline" data-i18n="about.tagline">{about.tagline}</p>
+          <span class="about__quote-rule" aria-hidden="true"></span>
+        </div>
+      </div>
+
+      <!-- PILLARS -->
+      <div class="pillars">
+        <article class="pillar">
+          <span class="pillar__num">01</span>
+          <span class="pillar__icon">
+            <span class="icon icon--lg" style="--grad: url(#grad-terra-lemon)" set:html={iconSvg('heart-handshake')} />
+          </span>
+          <p class="pillar__label" data-i18n="about.pillar1.label">Подход</p>
+          <p class="pillar__text"  data-i18n="about.pillar1.text">{about.bio[0]}</p>
+        </article>
+        <article class="pillar">
+          <span class="pillar__num">02</span>
+          <span class="pillar__icon">
+            <span class="icon icon--lg" style="--grad: url(#grad-azure-terra)" set:html={iconSvg('book-open')} />
+          </span>
+          <p class="pillar__label" data-i18n="about.pillar2.label">Формат</p>
+          <p class="pillar__text"  data-i18n="about.pillar2.text">{about.bio[1]}</p>
+        </article>
+        <article class="pillar">
+          <span class="pillar__num">03</span>
+          <span class="pillar__icon">
+            <span class="icon icon--lg" style="--grad: url(#grad-lemon-olive)" set:html={iconSvg('puzzle')} />
+          </span>
+          <p class="pillar__label" data-i18n="about.pillar3.label">Для любопытных</p>
+          <p class="pillar__text"  data-i18n="about.pillar3.text">{about.bio[2]}</p>
+        </article>
+      </div>
+
+      <!-- CREDENTIALS STRIP -->
+      <div class="about__credentials">
+        {about.credentials.map((c, i) => (
+          <div class="about__credential">
+            <span class="icon icon--sm" set:html={iconSvg(c.icon)} />
+            <span data-i18n={`credential.${i}`}>{c.text}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <div class="divider" aria-hidden="true"></div>
+
+  <!-- ============ TOURS ============ -->
+  <section class="tours" id="tours">
+    <div class="container">
+      <p class="kicker kicker--center" data-i18n="tours.kicker">Маршруты</p>
+      <h2 class="section-title section-title--center" data-i18n="tours.title">Экскурсии и туры</h2>
+      <p class="tours__intro" data-i18n="tours.intro">Каждый маршрут — авторский. От двухчасовой прогулки до многодневного путешествия по Кампании.</p>
+
+      <!-- Category chips -->
+      <div class="chips-wrap">
+        <div class="chips" role="tablist">
+          <button class="chip chip--active" data-category="all" role="tab">
+            <span class="chip__icon" set:html={iconSvg('layers')} />
+            <span class="chip__text" data-i18n="chip.all">Все</span>
+          </button>
+          {visibleCategories.map((cat) => (
+            <button class="chip" data-category={cat.id} role="tab" style={`--grad: url(#${gradForCategory(cat.id)})`}>
+              <span class="chip__icon" set:html={iconSvg(cat.icon)} />
+              <span class="chip__text" data-i18n={`category.${cat.id}`}>{cat.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- Tours grid -->
+      <div class="tours__grid" data-lang-only="ru">
+        {ruTours.map((tour, idx) => {
+          const cat = categories.find(c => c.id === tour.category);
+          const gradId = gradForCategory(tour.category);
+          return (
+            <article class="card" data-category={tour.category} style={`--delay: ${(idx % 9) * 0.05}s`}>
+              <div class="card__media">
+                <img src={tour.image} alt={tour.title} loading="lazy" />
+                <span class="card__cat">
+                  <span class="icon icon--sm" style={`--grad: url(#${gradId})`} set:html={iconSvg(cat?.icon || 'sparkles')} />
+                  <span data-i18n={`category.${cat?.id}`}>{cat?.name}</span>
+                </span>
+              </div>
+              <div class="card__body">
+                <h3 class="card__title">{tour.title}</h3>
+                <p class="card__subtitle">{tour.subtitle}</p>
+                <p class="card__desc">{tour.description}</p>
+                <div class="card__meta">
+                  <span class="card__meta-item">
+                    <span class="icon icon--xs" set:html={iconSvg('clock')} />
+                    {tour.duration}
+                  </span>
+                  {tour.maxPeople && (
+                    <span class="card__meta-item">
+                      <span class="icon icon--xs" set:html={iconSvg('users')} />
+                      {tour.maxPeople}
+                    </span>
+                  )}
+                </div>
+                {tour.extras && <p class="card__extras">{tour.extras}</p>}
+                <div class="card__footer">
+                  <span class="card__price">{tour.price}</span>
+                  <div class="card__actions">
+                    {tour.externalUrl ? (
+                      <a href={tour.externalUrl} target="_blank" rel="noopener" class="btn btn--small btn--primary" data-i18n="card.telegram">
+                        Открыть в Telegram
+                      </a>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          class="btn btn--small btn--ghost"
+                          data-modal-open
+                          data-tour-id={tour.id}
+                          data-i18n="card.details"
+                        >Подробнее</button>
+                        <button
+                          type="button"
+                          class="btn btn--small btn--primary"
+                          data-quick-book
+                          data-tour-title={tour.title}
+                          data-i18n="card.book"
+                        >В WhatsApp</button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+
+      <!-- English tours grid -->
+      <div class="tours__grid" data-lang-only="en">
+        {enTours.map((tour) => {
+          const cat = categories.find(c => c.id === tour.category);
+          return (
+            <article class="card" data-category={tour.category}>
+              <div class="card__media">
+                <img src={tour.image} alt={tour.title} loading="lazy" />
+                <span class="card__cat">
+                  <span class="icon icon--sm" set:html={iconSvg(cat?.icon || 'sparkles')} />
+                  {cat?.name}
+                </span>
+              </div>
+              <div class="card__body">
+                <h3 class="card__title">{tour.title}</h3>
+                <p class="card__subtitle">{tour.subtitle}</p>
+                <p class="card__desc">{tour.description}</p>
+                <div class="card__meta">
+                  <span class="card__meta-item">
+                    <span class="icon icon--xs" set:html={iconSvg('clock')} />
+                    {tour.duration}
+                  </span>
+                  {tour.maxPeople && (
+                    <span class="card__meta-item">
+                      <span class="icon icon--xs" set:html={iconSvg('users')} />
+                      {tour.maxPeople}
+                    </span>
+                  )}
+                </div>
+                {tour.extras && <p class="card__extras">{tour.extras}</p>}
+                <div class="card__footer">
+                  <span class="card__price">{tour.price}</span>
+                  <div class="card__actions">
+                    <button type="button" class="btn btn--small btn--ghost" data-modal-open data-tour-id={tour.id}>Read more</button>
+                    <button type="button" class="btn btn--small btn--primary" data-quick-book data-tour-title={tour.title}>WhatsApp</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COUCH SECTION ============ -->
+  <section class="couch" id="couch">
+    <div class="container couch__inner">
+      <div class="couch__icon-wrap">
+        <span class="icon icon--xl" style="--grad: url(#grad-azure-sky)" set:html={iconSvg('play-circle')} />
+      </div>
+      <div class="couch__text">
+        <p class="kicker" data-i18n="couch.kicker">Для тех, кто пока не в Италии</p>
+        <h2 class="section-title" data-i18n="couch.title">Экскурсии на диване</h2>
+        <p data-i18n="couch.text">Серия видео-прогулок от Маши в Telegram-канале. Путешествуйте по Амальфи, Помпеям и Неаполю, не вставая с дивана.</p>
+      </div>
+      <a href="https://t.me/amalfitanskiekanikuly/1876" target="_blank" rel="noopener" class="btn btn--primary btn--lg" data-i18n="couch.btn">
+        Смотреть в Telegram
+      </a>
+    </div>
+  </section>
+
+  <div class="divider" aria-hidden="true"></div>
+
+  <!-- ============ FORM ============ -->
+  <section class="form-section" id="form">
+    <div class="container form-section__grid">
+      <div class="form-section__info">
+        <p class="kicker" data-i18n="form.kicker">Заявка</p>
+        <h2 class="section-title" data-i18n="form.title">Запишитесь на экскурсию</h2>
+        <p class="form-section__lead" data-i18n="form.lead">Расскажите коротко, что интересует — откроется чат в WhatsApp с уже заполненным сообщением.</p>
+        <ul class="form-section__perks">
+          <li><span class="icon icon--sm" set:html={iconSvg('message-circle')} /> <span data-i18n="form.perk1">Ответ — в течение нескольких часов</span></li>
+          <li><span class="icon icon--sm" set:html={iconSvg('wallet')} /> <span data-i18n="form.perk2">Оплата на месте, без предоплаты</span></li>
+          <li><span class="icon icon--sm" set:html={iconSvg('route')} /> <span data-i18n="form.perk3">Маршрут под вас</span></li>
+        </ul>
+      </div>
+
+      <form class="form" id="booking-form" novalidate>
+        <div class="form__group">
+          <label for="f-name" data-i18n="form.name.label">Ваше имя</label>
+          <input id="f-name" name="name" type="text" placeholder="Как к вам обращаться?" data-i18n-placeholder="form.name.placeholder" required />
+        </div>
+        <div class="form__group">
+          <label for="f-tour" data-i18n="form.tour.label">Интересующая экскурсия</label>
+          <select id="f-tour" name="tour" required>
+            <option value="" data-i18n="form.tour.placeholder">Выберите экскурсию…</option>
+            {visibleCategories.map((cat) => (
+              <optgroup label={cat.name} data-cat-id={cat.id} data-i18n-label={`category.${cat.id}`}>
+                {ruTours.filter(t => t.category === cat.id).map(t => (
+                  <option value={t.title}>{t.title} — {t.price}</option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+        </div>
+        <div class="form__group">
+          <label for="f-note" data-i18n="form.note.label">Даты, количество человек, пожелания</label>
+          <textarea id="f-note" name="note" rows="4" placeholder="Например: 12–15 июня, 2 взрослых + ребёнок 10 лет, интересует вторая половина дня" data-i18n-placeholder="form.note.placeholder"></textarea>
+        </div>
+        <button type="submit" class="btn btn--primary btn--lg btn--full">
+          <span class="icon icon--sm icon--plain" set:html={iconSvg('message-circle')} />
+          <span data-i18n="form.submit">Отправить в WhatsApp</span>
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <div class="divider" aria-hidden="true"></div>
+
+  <!-- ============ CONTACT ============ -->
+  <section class="contact" id="contact">
+    <div class="container">
+      <p class="kicker kicker--center" data-i18n="contact.kicker">Связь</p>
+      <h2 class="section-title section-title--center" data-i18n="contact.title">Как со мной связаться</h2>
+
+      <div class="contact__grid">
+        <a href={`https://wa.me/${contacts.whatsappNumber}`} target="_blank" rel="noopener" class="contact__card contact__card--whatsapp">
+          <span class="contact__icon" set:html={iconSvg('message-circle')} />
+          <span class="contact__label">WhatsApp</span>
+          <span class="contact__value">{contacts.phone}</span>
+        </a>
+        <a href={contacts.telegram} target="_blank" rel="noopener" class="contact__card">
+          <span class="contact__icon" set:html={iconSvg('send')} />
+          <span class="contact__label">Telegram</span>
+          <span class="contact__value">{contacts.telegramName}</span>
+        </a>
+        <a href={contacts.instagram} target="_blank" rel="noopener" class="contact__card">
+          <span class="contact__icon" set:html={iconSvg('instagram')} />
+          <span class="contact__label">Instagram</span>
+          <span class="contact__value">{contacts.instagramHandle}</span>
+        </a>
+        <a href={`mailto:${contacts.email}`} class="contact__card">
+          <span class="contact__icon" set:html={iconSvg('mail')} />
+          <span class="contact__label">Email</span>
+          <span class="contact__value">{contacts.email}</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <div class="container footer__grid">
+      <div class="footer__col footer__col--brand">
+        <p class="footer__logo" data-i18n="footer.logo">Маша Шишкова</p>
+        <p class="footer__tagline" data-i18n="footer.tagline">Лицензированный гид по региону Кампания</p>
+        <div class="footer__social">
+          <a href={contacts.telegram} target="_blank" rel="noopener" aria-label="Telegram" set:html={iconSvg('send')} />
+          <a href={contacts.instagram} target="_blank" rel="noopener" aria-label="Instagram" set:html={iconSvg('instagram')} />
+          <a href={contacts.facebook} target="_blank" rel="noopener" aria-label="Facebook" set:html={iconSvg('facebook')} />
+          <a href={`mailto:${contacts.email}`} aria-label="Email" set:html={iconSvg('mail')} />
+        </div>
+      </div>
+
+      <div class="footer__col">
+        <h4 class="footer__heading" data-i18n="footer.h.tours">Экскурсии</h4>
+        <ul class="footer__list">
+          {visibleCategories.slice(0, 5).map(cat => (
+            <li><a href="#tours" data-i18n={`category.${cat.id}`}>{cat.name}</a></li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="footer__col footer__col--license">
+        <h4 class="footer__heading" data-i18n="footer.h.license">Лицензия</h4>
+        <a href={licenseUrl} target="_blank" rel="noopener" class="footer__license">
+          <img src={qrSrc} alt="QR" width="96" height="96" />
+          <div>
+            <p data-i18n="footer.license.text">Licensed tourist guide<br />Regione Campania</p>
+            <p class="footer__license-url">portaleprofessioni<br />.ministeroturismo.gov.it</p>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="container footer__bottom">
+      <p data-i18n="footer.copyright">© 2024–2026 {about.name}. Все права защищены.</p>
+      <p class="footer__legal" data-i18n="footer.legal">Guida turistica abilitata dalla Regione Campania.</p>
+    </div>
+  </footer>
+
+  <!-- ============ MODAL ============ -->
+  <dialog class="modal" id="tourModal">
+    <button class="modal__close" aria-label="Close" data-i18n-aria="modal.close" data-modal-close>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+    <div class="modal__body">
+      <p class="modal__kicker" id="modalKicker"></p>
+      <h2 class="modal__title" id="modalTitle"></h2>
+      <p class="modal__subtitle" id="modalSubtitle"></p>
+      <div class="modal__meta" id="modalMeta"></div>
+      <div class="modal__long" id="modalLong"></div>
+      <p class="modal__extras" id="modalExtras"></p>
+      <div class="modal__cta">
+        <span class="modal__price" id="modalPrice"></span>
+        <button type="button" class="btn btn--primary btn--lg" id="modalBook">
+          <span class="icon icon--sm icon--plain" set:html={iconSvg('message-circle')} />
+          <span data-i18n="modal.book">Записаться в WhatsApp</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ============ SCRIPTS ============ -->
+  <script is:inline define:vars={{ whatsappNumber: contacts.whatsappNumber, toursData: ruTours.concat(enTours) }}>
+    // ====== WhatsApp URL builder ======
+    function toWhatsApp({ name, tour, note, prefix }) {
+      const lines = [
+        prefix || 'Здравствуйте, Маша!',
+        name && `Меня зовут ${name}.`,
+        tour && `Интересует экскурсия: ${tour}.`,
+        note && `Пожелания: ${note}`,
+      ].filter(Boolean);
+      return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(lines.join('\n'))}`;
+    }
+
+    // ====== Mobile nav ======
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+    navToggle?.addEventListener('click', () => {
+      navLinks?.classList.toggle('nav__links--open');
+      navToggle.classList.toggle('nav__toggle--open');
+    });
+    navLinks?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+      navLinks.classList.remove('nav__links--open');
+      navToggle?.classList.remove('nav__toggle--open');
+    }));
+
+    // ====== Sticky nav ======
+    const nav = document.getElementById('nav');
+    const hero = document.getElementById('top');
+    if (hero && nav) {
+      new IntersectionObserver(([entry]) => {
+        nav.classList.toggle('nav--scrolled', !entry.isIntersecting);
+      }, { threshold: 0.05 }).observe(hero);
+    }
+
+    // ====== Category chips ======
+    const chips = document.querySelectorAll('.chip');
+    const cards = document.querySelectorAll('.card');
+    chips.forEach(chip => chip.addEventListener('click', () => {
+      chips.forEach(c => c.classList.remove('chip--active'));
+      chip.classList.add('chip--active');
+      const cat = chip.dataset.category;
+      cards.forEach(card => {
+        const show = cat === 'all' || card.dataset.category === cat;
+        card.style.display = show ? '' : 'none';
+      });
+    }));
+
+    // ====== Quick book (WhatsApp directly from card) ======
+    document.querySelectorAll('[data-quick-book]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const url = toWhatsApp({ tour: btn.dataset.tourTitle });
+        window.open(url, '_blank', 'noopener');
+      });
+    });
+
+    // ====== Modal ======
+    const modal = document.getElementById('tourModal');
+    const mKicker = document.getElementById('modalKicker');
+    const mTitle = document.getElementById('modalTitle');
+    const mSubtitle = document.getElementById('modalSubtitle');
+    const mMeta = document.getElementById('modalMeta');
+    const mLong = document.getElementById('modalLong');
+    const mExtras = document.getElementById('modalExtras');
+    const mPrice = document.getElementById('modalPrice');
+    const mBook = document.getElementById('modalBook');
+
+    function mdToHtml(s) {
+      if (!s) return '';
+      return s
+        .split(/\n{2,}/)
+        .map(block => {
+          if (/^[•*\-]\s/m.test(block)) {
+            const items = block.split(/\n/).filter(Boolean).map(line => {
+              const cleaned = line.replace(/^[•*\-]\s*/, '').trim();
+              return cleaned ? `<li>${inline(cleaned)}</li>` : '';
+            }).join('');
+            return `<ul>${items}</ul>`;
+          }
+          return `<p>${inline(block).replace(/\n/g, '<br>')}</p>`;
+        })
+        .join('');
+      function inline(t) {
+        return t
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.+?)\*/g, '$1');
+      }
+    }
+
+    let closingFromHistory = false;
+
+    function openModal(tourId) {
+      const tour = toursData.find(t => t.id === tourId);
+      if (!tour) return;
+      mKicker.textContent = '';
+      mTitle.textContent = tour.title;
+      mSubtitle.textContent = tour.subtitle || '';
+      mMeta.innerHTML = [
+        tour.duration && `<span>⏱ ${tour.duration}</span>`,
+        tour.maxPeople && `<span>👥 ${tour.maxPeople}</span>`,
+      ].filter(Boolean).join('');
+      mLong.innerHTML = mdToHtml(tour.longDescription || tour.description);
+      mExtras.textContent = tour.extras || '';
+      mExtras.style.display = tour.extras ? '' : 'none';
+      mPrice.textContent = tour.price;
+      mBook.onclick = () => window.open(toWhatsApp({ tour: tour.title }), '_blank', 'noopener');
+      modal.showModal();
+      // Push history entry so browser back closes modal
+      history.pushState({ modal: tour.id }, '', `#tour-${tour.id}`);
+    }
+
+    document.querySelectorAll('[data-modal-open]').forEach(btn => {
+      btn.addEventListener('click', () => openModal(btn.dataset.tourId));
+    });
+
+    document.querySelectorAll('[data-modal-close]').forEach(btn => {
+      btn.addEventListener('click', () => modal.close());
+    });
+
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        // backdrop click (dialog itself, not children)
+        modal.close();
+      }
+    });
+
+    // When modal closes (Esc / backdrop / X), rewind history unless close came from popstate
+    modal?.addEventListener('close', () => {
+      if (!closingFromHistory && history.state && history.state.modal) {
+        history.back();
+      }
+      closingFromHistory = false;
+    });
+
+    // Browser back button — close the modal if open
+    window.addEventListener('popstate', () => {
+      if (modal?.open) {
+        closingFromHistory = true;
+        modal.close();
+      }
+    });
+
+    // Deep-link: open modal if URL already has #tour-<id> on load
+    window.addEventListener('DOMContentLoaded', () => {
+      const m = location.hash.match(/^#tour-([\w-]+)$/);
+      if (m) openModal(m[1]);
+    });
+
+    // ====== Form ======
+    document.getElementById('booking-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.currentTarget);
+      const url = toWhatsApp({
+        name: fd.get('name'),
+        tour: fd.get('tour'),
+        note: fd.get('note'),
+      });
+      window.open(url, '_blank', 'noopener');
+    });
+
+    // ====== i18n dictionary ======
+    const I18N = {
+      ru: {
+        'logo.name': 'Маша Шишкова',
+        'logo.sub':  'гид в Кампании',
+        'nav.about':   'Обо мне',
+        'nav.tours':   'Экскурсии',
+        'nav.couch':   'На диване',
+        'nav.contact': 'Контакты',
+        'nav.book':    'Записаться',
+        'hero.over1':  'ЛИЦЕНЗИРОВАННЫЙ ГИД',
+        'hero.over2':  'в регионе Кампания',
+        'hero.name':   'Маша Шишкова',
+        'hero.tagline':'Из итальянского гида в Санкт-Петербурге — в русского гида в Италии.',
+        'hero.cta.primary':   'Выбрать экскурсию',
+        'hero.cta.secondary': 'Написать в WhatsApp',
+        'hero.license.label': 'Лицензия Regione Campania',
+        'hero.license.qrAlt': 'QR код лицензии',
+        'hero.scroll.aria':   'Прокрутить ниже',
+        'geo.0': 'Неаполь', 'geo.1': 'Помпеи', 'geo.2': 'Амальфи', 'geo.3': 'Капри', 'geo.4': 'Пестум',
+        'about.kicker': 'Обо мне',
+        'about.name':   'Маша Шишкова',
+        'about.tagline':'Из итальянского гида в Санкт-Петербурге — в русского гида в Италии.',
+        'about.pillar1.label': 'Подход',
+        'about.pillar1.text':  'Ваш душевно-снобистский проводник по истории и культуре итальянского юга.',
+        'about.pillar2.label': 'Формат',
+        'about.pillar2.text':  'Интеллектуальные прогулки с захватывающими подробностями, иронией и юмором.',
+        'about.pillar3.label': 'Для любопытных',
+        'about.pillar3.text':  'Квесты для любознательных детей, дегустации.',
+        'polaroid.name': 'Маша Шишкова',
+        'polaroid.role': 'Лицензированный гид · Санкт-Петербург · Амальфи',
+        'credential.0': 'Институт иностранных языков',
+        'credential.1': 'Майори, Амальфитанское побережье',
+        'credential.2': 'Лицензия Regione Campania',
+        'tours.kicker': 'Маршруты',
+        'tours.title':  'Экскурсии и туры',
+        'tours.intro':  'Каждый маршрут — авторский. От двухчасовой прогулки до многодневного путешествия по Кампании.',
+        'chip.all':     'Все',
+        'category.naples':  'Неаполь',
+        'category.pompeii': 'Помпеи и Геркуланум',
+        'category.amalfi':  'Амальфитанское побережье',
+        'category.quests':  'Квесты',
+        'category.sea':     'Морские прогулки',
+        'category.multi':   'Многодневные туры',
+        'category.couch':   'Экскурсии на диване',
+        'category.extra':   'Дополнительные услуги',
+        'card.details':  'Подробнее',
+        'card.book':     'В WhatsApp',
+        'card.telegram': 'Открыть в Telegram',
+        'couch.kicker': 'Для тех, кто пока не в Италии',
+        'couch.title':  'Экскурсии на диване',
+        'couch.text':   'Серия видео-прогулок от Маши в Telegram-канале. Путешествуйте по Амальфи, Помпеям и Неаполю, не вставая с дивана.',
+        'couch.btn':    'Смотреть в Telegram',
+        'form.kicker':  'Заявка',
+        'form.title':   'Запишитесь на экскурсию',
+        'form.lead':    'Расскажите коротко, что интересует — откроется чат в WhatsApp с уже заполненным сообщением.',
+        'form.perk1':   'Ответ — в течение нескольких часов',
+        'form.perk2':   'Оплата на месте, без предоплаты',
+        'form.perk3':   'Маршрут под вас',
+        'form.name.label':       'Ваше имя',
+        'form.name.placeholder': 'Как к вам обращаться?',
+        'form.tour.label':       'Интересующая экскурсия',
+        'form.tour.placeholder': 'Выберите экскурсию…',
+        'form.note.label':       'Даты, количество человек, пожелания',
+        'form.note.placeholder': 'Например: 12–15 июня, 2 взрослых + ребёнок 10 лет, интересует вторая половина дня',
+        'form.submit': 'Отправить в WhatsApp',
+        'contact.kicker': 'Связь',
+        'contact.title':  'Как со мной связаться',
+        'footer.logo':       'Маша Шишкова',
+        'footer.tagline':    'Лицензированный гид по региону Кампания',
+        'footer.h.tours':    'Экскурсии',
+        'footer.h.license':  'Лицензия',
+        'footer.license.text': 'Licensed tourist guide<br>Regione Campania',
+        'footer.copyright':  '© 2024–2026 Маша Шишкова. Все права защищены.',
+        'footer.legal':      'Guida turistica abilitata dalla Regione Campania.',
+        'modal.book':  'Записаться в WhatsApp',
+        'modal.close': 'Закрыть',
+      },
+      en: {
+        'logo.name': 'Masha Shishkova',
+        'logo.sub':  'guide in Campania',
+        'nav.about':   'About',
+        'nav.tours':   'Tours',
+        'nav.couch':   'Videos',
+        'nav.contact': 'Contact',
+        'nav.book':    'Book',
+        'hero.over1':  'LICENSED GUIDE',
+        'hero.over2':  'in Regione Campania',
+        'hero.name':   'Masha Shishkova',
+        'hero.tagline':'From an Italian guide in St. Petersburg to a Russian guide in Italy.',
+        'hero.cta.primary':   'Choose a tour',
+        'hero.cta.secondary': 'Chat on WhatsApp',
+        'hero.license.label': 'Regione Campania license',
+        'hero.license.qrAlt': 'License QR code',
+        'hero.scroll.aria':   'Scroll down',
+        'geo.0': 'Naples', 'geo.1': 'Pompeii', 'geo.2': 'Amalfi', 'geo.3': 'Capri', 'geo.4': 'Paestum',
+        'about.kicker': 'About me',
+        'about.name':   'Masha Shishkova',
+        'about.tagline':'From an Italian guide in St. Petersburg to a Russian guide in Italy.',
+        'about.pillar1.label': 'Approach',
+        'about.pillar1.text':  'Your warm-hearted, slightly-snobbish guide to the history and culture of the Italian south.',
+        'about.pillar2.label': 'Format',
+        'about.pillar2.text':  'Intellectual walks with captivating details, irony and humor.',
+        'about.pillar3.label': 'For the curious',
+        'about.pillar3.text':  'Quests for curious kids, tastings.',
+        'polaroid.name': 'Masha Shishkova',
+        'polaroid.role': 'Licensed guide · St. Petersburg · Amalfi',
+        'credential.0': 'Institute of Foreign Languages',
+        'credential.1': 'Maiori, Amalfi Coast',
+        'credential.2': 'Regione Campania license',
+        'tours.kicker': 'Itineraries',
+        'tours.title':  'Tours & itineraries',
+        'tours.intro':  'Every itinerary is original. From a two-hour walk to a multi-day journey across Campania.',
+        'chip.all':     'All',
+        'category.naples':  'Naples',
+        'category.pompeii': 'Pompeii & Herculaneum',
+        'category.amalfi':  'Amalfi Coast',
+        'category.quests':  'Quests',
+        'category.sea':     'Sea trips',
+        'category.multi':   'Multi-day tours',
+        'category.couch':   'Couch tours',
+        'category.extra':   'Extras',
+        'card.details':  'Read more',
+        'card.book':     'WhatsApp',
+        'card.telegram': 'Open in Telegram',
+        'couch.kicker': 'For those not yet in Italy',
+        'couch.title':  'Couch tours',
+        'couch.text':   'A series of video walks from Masha on Telegram. Travel through Amalfi, Pompeii and Naples from your couch.',
+        'couch.btn':    'Watch on Telegram',
+        'form.kicker':  'Booking',
+        'form.title':   'Book a tour',
+        'form.lead':    "Tell me briefly what you're interested in — I'll open a WhatsApp chat with a pre-filled message.",
+        'form.perk1':   'Reply within a few hours',
+        'form.perk2':   'Pay on arrival, no deposit',
+        'form.perk3':   'Itinerary tailored to you',
+        'form.name.label':       'Your name',
+        'form.name.placeholder': 'How should I address you?',
+        'form.tour.label':       'Tour of interest',
+        'form.tour.placeholder': 'Choose a tour…',
+        'form.note.label':       'Dates, people, wishes',
+        'form.note.placeholder': 'E.g.: June 12–15, 2 adults + a 10-y-o kid, afternoon preferred',
+        'form.submit': 'Send to WhatsApp',
+        'contact.kicker': 'Get in touch',
+        'contact.title':  'How to reach me',
+        'footer.logo':       'Masha Shishkova',
+        'footer.tagline':    'Licensed guide for the Campania region',
+        'footer.h.tours':    'Tours',
+        'footer.h.license':  'License',
+        'footer.license.text': 'Licensed tourist guide<br>Regione Campania',
+        'footer.copyright':  '© 2024–2026 Masha Shishkova. All rights reserved.',
+        'footer.legal':      'Guida turistica abilitata dalla Regione Campania.',
+        'modal.book':  'Book via WhatsApp',
+        'modal.close': 'Close',
+      }
+    };
+
+    function applyI18n(lang) {
+      const dict = I18N[lang] || I18N.ru;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        const val = dict[key];
+        if (val == null) return;
+        if (val.includes('<br>') || val.includes('<strong>')) el.innerHTML = val;
+        else el.textContent = val;
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const v = dict[el.getAttribute('data-i18n-placeholder')];
+        if (v != null) el.setAttribute('placeholder', v);
+      });
+      document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+        const v = dict[el.getAttribute('data-i18n-aria')];
+        if (v != null) el.setAttribute('aria-label', v);
+      });
+      document.querySelectorAll('[data-i18n-alt]').forEach(el => {
+        const v = dict[el.getAttribute('data-i18n-alt')];
+        if (v != null) el.setAttribute('alt', v);
+      });
+      document.querySelectorAll('[data-i18n-label]').forEach(el => {
+        const v = dict[el.getAttribute('data-i18n-label')];
+        if (v != null) el.setAttribute('label', v);
+      });
+      document.documentElement.setAttribute('lang', lang);
+    }
+
+    // ====== Lang switch ======
+    const langToggle = document.getElementById('langToggle');
+    const saved = localStorage.getItem('lang');
+    const initialLang = saved === 'en' ? 'en' : 'ru';
+    document.documentElement.dataset.lang = initialLang;
+    applyI18n(initialLang);
+
+    function setLang(lang) {
+      if (document.documentElement.dataset.lang === lang) return;
+      document.body.classList.add('is-switching');
+      setTimeout(() => {
+        document.documentElement.dataset.lang = lang;
+        localStorage.setItem('lang', lang);
+        applyI18n(lang);
+        requestAnimationFrame(() => {
+          document.body.classList.remove('is-switching');
+        });
+      }, 180);
+    }
+
+    langToggle?.addEventListener('click', (e) => {
+      const opt = e.target.closest('[data-lang]');
+      const nextLang = opt?.dataset.lang
+        || (document.documentElement.dataset.lang === 'en' ? 'ru' : 'en');
+      setLang(nextLang);
+    });
+
+    // ====== Scroll reveal ======
+    const reveal = new IntersectionObserver((entries) => {
+      entries.forEach(en => {
+        if (en.isIntersecting) {
+          en.target.classList.add('is-visible');
+          reveal.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.card, .about__quote, .about__photo-area, .pillar, .contact__card, .form-section__info, .form, .couch__inner').forEach(el => reveal.observe(el));
+  </script>
+
+  <!-- ============ STYLES ============ -->
+  <style is:global>
+    :root {
+      --azure:       #1a6b8a;
+      --azure-deep:  #0d4a5e;
+      --azure-light: #2b8fad;
+      --terracotta:  #c4622d;
+      --terracotta-light: #d9794a;
+      --lemon:       #d9a441;
+      --olive:       #6b7c3e;
+      --cream:       #fefcf7;
+      --cream-warm:  #f5efe2;
+      --paper:       #faf6ee;
+      --ink:         #1e1812;
+      --text:        #2c2418;
+      --text-mute:   #6b5d4a;
+      --text-soft:   #998670;
+      --line:        #e8ddc8;
+
+      --font-display: 'Cormorant Infant', Georgia, 'Times New Roman', serif;
+      --font-body:    'Golos Text', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+
+      --nav-h: 72px;
+      --container: 1200px;
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+
+      --shadow-sm: 0 1px 2px rgba(30, 24, 18, 0.04), 0 2px 8px rgba(30, 24, 18, 0.06);
+      --shadow-md: 0 2px 6px rgba(30, 24, 18, 0.06), 0 12px 40px rgba(30, 24, 18, 0.08);
+      --shadow-lg: 0 4px 12px rgba(30, 24, 18, 0.08), 0 24px 80px rgba(30, 24, 18, 0.12);
+
+      --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
     body {
-      font-family: 'Cormorant Garamond', serif;
-      background: #0a0a0a;
-      color: #f5f0e8;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--cream);
+      overflow-x: hidden;
+    }
+    img, svg, video { max-width: 100%; display: block; }
+    a { color: var(--azure); text-decoration: none; transition: color 0.2s; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+    .container { max-width: var(--container); margin: 0 auto; padding: 0 clamp(1.25rem, 4vw, 2.5rem); }
+
+    /* ============ LANG TOGGLE ============ */
+    html[data-lang="ru"] [data-lang-only="en"] { display: none; }
+    html[data-lang="en"] [data-lang-only="ru"] { display: none; }
+    html[data-lang="ru"] [data-lang-label="ru"] { color: var(--text); font-weight: 600; }
+    html[data-lang="ru"] [data-lang-label="en"] { color: var(--text-soft); }
+    html[data-lang="en"] [data-lang-label="en"] { color: var(--text); font-weight: 600; }
+    html[data-lang="en"] [data-lang-label="ru"] { color: var(--text-soft); }
+
+    /* ============ TYPOGRAPHY ============ */
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 1.5rem + 2.5vw, 3.5rem);
+      font-weight: 500;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin-bottom: 1rem;
+    }
+    .section-title--center { text-align: center; }
+
+    .kicker {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--terracotta);
+      margin-bottom: 0.8rem;
+    }
+    .kicker--center { text-align: center; }
+
+    /* ============ DIVIDER ============ */
+    .divider {
+      width: 120px; height: 2px;
+      margin: 0 auto;
+      background: linear-gradient(90deg, var(--azure) 50%, var(--terracotta) 50%);
+      opacity: 0.55;
+    }
+
+    /* ============ ICONS ============ */
+    .icon { display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; color: var(--azure); }
+    .icon svg { width: 100%; height: 100%; }
+    .icon--xs { width: 14px; height: 14px; }
+    .icon--sm { width: 18px; height: 18px; }
+    .icon--md { width: 24px; height: 24px; }
+    .icon--lg { width: 36px; height: 36px; }
+    .icon--xl { width: 64px; height: 64px; }
+
+    /* gradient strokes for icons (not `.icon--plain`) */
+    .icon:not(.icon--plain) svg { stroke: var(--grad, url(#grad-azure-terra)); }
+    .icon:not(.icon--plain) svg * { stroke: var(--grad, url(#grad-azure-terra)); }
+
+    /* ============ BUTTONS ============ */
+    .btn {
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      text-align: center;
-      padding: 2rem;
+      gap: 0.5em;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      padding: 0.8em 1.8em;
+      border-radius: 999px;
+      border: 1.5px solid transparent;
+      transition: all 0.25s var(--ease);
+      white-space: nowrap;
     }
-    h1 { font-size: clamp(2rem, 5vw, 4rem); font-weight: 400; margin-bottom: 0.5em; letter-spacing: 0.05em; }
-    p { font-size: 1.2rem; opacity: 0.7; margin-bottom: 3rem; }
-    .versions { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; }
-    .versions a {
-      display: block;
-      padding: 2rem 3rem;
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      color: #d4af37;
+    .btn--primary { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+    .btn--primary:hover { background: var(--terracotta); border-color: var(--terracotta); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .btn--outline { background: transparent; color: #fff; border-color: rgba(255,255,255,0.7); }
+    .btn--outline:hover { background: rgba(255,255,255,0.12); border-color: #fff; }
+    .btn--ghost { background: transparent; color: var(--text); border-color: var(--line); }
+    .btn--ghost:hover { background: var(--paper); border-color: var(--text); }
+    .btn--small { font-size: 0.85rem; padding: 0.55em 1.2em; }
+    .btn--lg { font-size: 1rem; padding: 1em 2.2em; }
+    .btn--full { width: 100%; }
+
+    /* ============ NAVIGATION ============ */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      transition: background 0.4s var(--ease), box-shadow 0.4s var(--ease), padding 0.3s var(--ease);
+      padding: 1rem 0;
+    }
+    .nav--scrolled {
+      background: rgba(254, 252, 247, 0.92);
+      backdrop-filter: blur(18px) saturate(1.2);
+      -webkit-backdrop-filter: blur(18px) saturate(1.2);
+      box-shadow: 0 1px 0 rgba(30, 24, 18, 0.06);
+      padding: 0.5rem 0;
+    }
+    .nav__inner {
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 0 clamp(1.25rem, 4vw, 2.5rem);
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .nav__logo {
+      display: flex; flex-direction: column; line-height: 1;
+      color: #fff;
       text-decoration: none;
-      font-size: 1.1rem;
+      margin-right: auto;
+      transition: color 0.3s;
+    }
+    .nav__logo-name {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .nav__logo-sub {
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 0.2rem;
+      opacity: 0.7;
+    }
+    .nav--scrolled .nav__logo { color: var(--ink); }
+
+    .nav__links {
+      display: flex; gap: 0.25rem; align-items: center; list-style: none;
+    }
+    .nav__links a {
+      display: inline-block;
+      color: rgba(255,255,255,0.9);
+      font-size: 0.92rem;
+      font-weight: 500;
+      padding: 0.55em 1.1em;
+      border-radius: 999px;
+      transition: all 0.25s var(--ease);
+    }
+    .nav__links a:hover { color: #fff; background: rgba(255,255,255,0.12); }
+    .nav--scrolled .nav__links a { color: var(--text); }
+    .nav--scrolled .nav__links a:hover { background: var(--cream-warm); }
+    .nav__cta {
+      border: 1.5px solid rgba(255,255,255,0.45);
+      background: rgba(255,255,255,0.08);
+    }
+    .nav--scrolled .nav__cta {
+      background: var(--ink) !important;
+      color: var(--cream) !important;
+      border-color: var(--ink);
+    }
+    .nav__cta:hover { background: rgba(255,255,255,0.2) !important; }
+    .nav--scrolled .nav__cta:hover { background: var(--terracotta) !important; border-color: var(--terracotta); }
+
+    /* ============ LANG SWITCH ============ */
+    .lang-switch {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      padding: 3px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.2);
+      user-select: none;
+      isolation: isolate;
+    }
+    .lang-switch__thumb {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: calc(50% - 3px);
+      bottom: 3px;
+      background: #fff;
+      border-radius: 999px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      transition: transform 0.35s var(--ease);
+      z-index: 0;
+    }
+    html[data-lang="en"] .lang-switch__thumb { transform: translateX(100%); }
+    .lang-switch__opt {
+      position: relative;
+      z-index: 1;
+      padding: 0.5em 0.95em;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 600;
       letter-spacing: 0.1em;
-      transition: all 0.3s;
+      color: rgba(255, 255, 255, 0.82);
+      min-width: 40px;
+      text-align: center;
+      background: transparent;
+      cursor: pointer;
+      transition: color 0.3s var(--ease);
     }
-    .versions a:hover {
-      background: rgba(212, 175, 55, 0.1);
-      border-color: #d4af37;
+    html[data-lang="ru"] .lang-switch__opt[data-lang="ru"],
+    html[data-lang="en"] .lang-switch__opt[data-lang="en"] {
+      color: var(--ink);
     }
-    .versions a span { display: block; font-size: 0.85rem; opacity: 0.6; margin-top: 0.5rem; color: #f5f0e8; }
+    .nav--scrolled .lang-switch {
+      background: var(--paper);
+      border-color: var(--line);
+      box-shadow: 0 1px 3px rgba(30, 24, 18, 0.06);
+    }
+    .nav--scrolled .lang-switch__thumb { background: var(--ink); }
+    .nav--scrolled .lang-switch__opt { color: var(--text-mute); }
+    .nav--scrolled html[data-lang="ru"] .lang-switch__opt[data-lang="ru"],
+    .nav--scrolled html[data-lang="en"] .lang-switch__opt[data-lang="en"],
+    html[data-lang="ru"] .nav--scrolled .lang-switch__opt[data-lang="ru"],
+    html[data-lang="en"] .nav--scrolled .lang-switch__opt[data-lang="en"] {
+      color: var(--cream);
+    }
+
+    /* ============ SWITCHING INDICATOR ============ */
+    body.is-switching .hero__content,
+    body.is-switching .about,
+    body.is-switching .tours,
+    body.is-switching .couch,
+    body.is-switching .form-section,
+    body.is-switching .contact,
+    body.is-switching .footer {
+      opacity: 0;
+      transition: opacity 0.18s ease;
+    }
+    body.is-switching { pointer-events: none; }
+    body.is-switching::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      width: 100%;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        var(--terracotta) 30%,
+        var(--azure) 70%,
+        transparent 100%);
+      background-size: 200% 100%;
+      z-index: 9999;
+      animation: langProgress 0.6s ease;
+    }
+    @keyframes langProgress {
+      0%   { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
+
+    .nav__toggle { display: none; flex-direction: column; gap: 5px; padding: 6px; }
+    .nav__toggle span { display: block; width: 24px; height: 2px; background: #fff; border-radius: 2px; transition: all 0.3s; }
+    .nav--scrolled .nav__toggle span { background: var(--ink); }
+    .nav__toggle--open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav__toggle--open span:nth-child(2) { opacity: 0; }
+    .nav__toggle--open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    @media (max-width: 900px) {
+      .nav__toggle { display: flex; }
+      .nav__links {
+        display: none;
+        position: absolute; top: 100%; left: 0; right: 0;
+        flex-direction: column; gap: 0;
+        padding: 1rem;
+        background: rgba(254, 252, 247, 0.98);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        box-shadow: var(--shadow-md);
+      }
+      .nav__links--open { display: flex; }
+      .nav__links a { color: var(--text) !important; padding: 0.8em 1.2em; }
+      .nav__cta { background: var(--ink) !important; color: var(--cream) !important; text-align: center; }
+      .lang-switch { order: 3; }
+    }
+
+    /* ============ HERO ============ */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      color: #fff;
+    }
+    .hero__video {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: center;
+      z-index: 0;
+    }
+    .hero__overlay {
+      position: absolute; inset: 0; z-index: 1;
+      background:
+        linear-gradient(180deg, rgba(13, 74, 94, 0.55) 0%, rgba(13, 74, 94, 0.25) 35%, rgba(30, 24, 18, 0.7) 100%);
+    }
+    .hero__content {
+      position: relative; z-index: 2;
+      text-align: center;
+      padding: calc(var(--nav-h) + 3rem) clamp(1.25rem, 4vw, 2.5rem) 5rem;
+      max-width: 820px;
+      animation: heroIn 1.2s var(--ease) both;
+    }
+    @keyframes heroIn {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero__over {
+      display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
+      margin-bottom: 1.5rem;
+      font-size: clamp(0.7rem, 0.62rem + 0.4vw, 0.85rem);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    .hero__over span:last-child {
+      letter-spacing: 0.12em;
+      text-transform: none;
+      
+      font-family: var(--font-display);
+      font-size: clamp(0.95rem, 0.8rem + 0.6vw, 1.15rem);
+      font-weight: 400;
+      opacity: 0.92;
+    }
+    .hero__title {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 2rem + 6vw, 6rem);
+      font-weight: 500;
+      line-height: 0.95;
+      letter-spacing: -0.015em;
+      margin: 0 0 1.5rem;
+      text-shadow: 0 4px 40px rgba(0,0,0,0.25);
+    }
+    .hero__geo {
+      display: inline-flex; flex-wrap: wrap; justify-content: center;
+      gap: 0.5rem 0.75rem;
+      font-size: clamp(0.85rem, 0.75rem + 0.4vw, 1rem);
+      letter-spacing: 0.08em;
+      margin-bottom: 1rem;
+      opacity: 0.88;
+    }
+    .hero__geo-sep { opacity: 0.5; }
+    .hero__tagline {
+      font-family: var(--font-display);
+      font-size: clamp(1.1rem, 0.9rem + 0.8vw, 1.4rem);
+      
+      font-weight: 400;
+      max-width: 560px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.4;
+      opacity: 0.95;
+    }
+    .hero__actions {
+      display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+    .hero__license {
+      display: inline-flex; align-items: center; gap: 0.85rem;
+      padding: 0.6rem 1rem 0.6rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.32);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.9);
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      transition: all 0.25s;
+    }
+    .hero__license:hover { background: rgba(0,0,0,0.45); }
+    .hero__license-qr {
+      width: 44px; height: 44px;
+      background: #fff;
+      padding: 4px;
+      border-radius: 8px;
+    }
+    .hero__license-text { display: flex; flex-direction: column; line-height: 1.3; text-align: left; }
+    .hero__license-label { font-weight: 500; color: #fff; }
+    .hero__license-url { opacity: 0.7; font-size: 0.72rem; }
+
+    .hero__scroll {
+      position: absolute;
+      left: 50%; transform: translateX(-50%);
+      bottom: 2rem; z-index: 3;
+      color: rgba(255,255,255,0.7);
+      animation: floatDown 2.5s ease-in-out infinite;
+    }
+    @keyframes floatDown {
+      0%,100% { transform: translate(-50%, 0); }
+      50% { transform: translate(-50%, 8px); }
+    }
+    .hero__scroll:hover { color: #fff; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero__video { display: none; }
+      .hero { background: url('/images/hero-poster.jpg') center/cover; }
+      .hero__scroll { animation: none; }
+    }
+
+    /* ============ ABOUT ============ */
+    .about { padding: clamp(4rem, 8vw, 7rem) 0; }
+    .about__head { text-align: center; margin-bottom: clamp(2.5rem, 5vw, 4rem); }
+
+    .about__grid {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) 1.3fr;
+      gap: clamp(2rem, 5vw, 5rem);
+      align-items: center;
+      margin-bottom: clamp(3rem, 6vw, 5rem);
+    }
+
+    /* POLAROID */
+    .about__photo-area {
+      display: flex;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s var(--ease);
+    }
+    .about__photo-area.is-visible { opacity: 1; transform: translateY(0); }
+
+    .polaroid {
+      position: relative;
+      padding: 14px 14px 18px;
+      background: #fdfaf2;
+      background-image:
+        linear-gradient(180deg, rgba(200, 180, 140, 0.05) 0%, rgba(200, 180, 140, 0) 30%),
+        radial-gradient(circle at 20% 85%, rgba(200, 180, 140, 0.06), transparent 40%);
+      box-shadow:
+        0 2px 3px rgba(30, 24, 18, 0.08),
+        0 14px 28px -10px rgba(30, 24, 18, 0.25),
+        0 30px 60px -30px rgba(30, 24, 18, 0.35);
+      transform: rotate(-2.2deg);
+      transition: transform 0.6s var(--ease);
+      max-width: 340px;
+      width: 100%;
+    }
+    .polaroid:hover { transform: rotate(0deg) scale(1.01); }
+
+    .polaroid__photo {
+      aspect-ratio: 4/5;
+      overflow: hidden;
+      background: #e8e2d2;
+      /* subtle film grain */
+      position: relative;
+    }
+    .polaroid__photo::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: radial-gradient(rgba(30, 24, 18, 0.06) 1px, transparent 1px);
+      background-size: 3px 3px;
+      mix-blend-mode: multiply;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+    .polaroid__photo img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: saturate(0.92) contrast(1.02);
+    }
+
+    .polaroid__caption {
+      margin-top: 16px;
+      text-align: center;
+      font-family: 'Caveat', 'Cormorant Infant', cursive;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .polaroid__name {
+      font-family: 'Caveat', cursive;
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: #2c2418;
+      letter-spacing: 0.01em;
+      line-height: 1;
+    }
+    .polaroid__role {
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #6b5d4a;
+    }
+
+    .polaroid__tape {
+      position: absolute;
+      width: 90px; height: 26px;
+      background: rgba(244, 220, 130, 0.55);
+      border: 1px solid rgba(180, 160, 90, 0.25);
+      box-shadow: 0 1px 2px rgba(30, 24, 18, 0.12);
+      pointer-events: none;
+    }
+    .polaroid__tape::before,
+    .polaroid__tape::after {
+      content: ''; position: absolute; top: 0; bottom: 0;
+      width: 6px;
+      background-image:
+        linear-gradient(45deg, transparent 33%, rgba(255,255,255,0.4) 33%, rgba(255,255,255,0.4) 66%, transparent 66%);
+      background-size: 4px 4px;
+    }
+    .polaroid__tape--left  { top: -12px; left: -14px;  transform: rotate(-18deg); }
+    .polaroid__tape--right { top: -12px; right: -14px; transform: rotate(20deg); }
+
+    /* QUOTE (tagline) */
+    .about__quote {
+      position: relative;
+      padding: 2rem 0 2rem 2.5rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s var(--ease) 0.15s;
+    }
+    .about__quote.is-visible,
+    .about__photo-area.is-visible + .about__quote { opacity: 1; transform: translateY(0); }
+
+    .about__quote-mark {
+      display: inline-flex;
+      width: 40px; height: 40px;
+      align-items: center; justify-content: center;
+      margin-bottom: 1rem;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(196, 98, 45, 0.12), rgba(26, 107, 138, 0.1));
+    }
+    .about__quote-mark .icon svg { stroke: url(#grad-terra-lemon); width: 22px; height: 22px; }
+
+    .about__tagline {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 1.2rem + 1.5vw, 2.4rem);
+      font-weight: 500;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin: 0 0 1.25rem;
+      max-width: 540px;
+    }
+    .about__quote-rule {
+      display: block;
+      width: 80px; height: 2px;
+      background: linear-gradient(90deg, var(--terracotta), transparent);
+    }
+
+    /* PILLARS */
+    .pillars {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(1rem, 2.5vw, 2rem);
+      margin-bottom: clamp(3rem, 5vw, 4rem);
+    }
+    .pillar {
+      position: relative;
+      padding: 2rem 1.6rem 1.8rem;
+      background: var(--cream);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      transition: all 0.35s var(--ease);
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .pillar:nth-child(1) { transition-delay: 0.1s; }
+    .pillar:nth-child(2) { transition-delay: 0.2s; }
+    .pillar:nth-child(3) { transition-delay: 0.3s; }
+    .about.is-visible .pillar,
+    .pillars.is-visible .pillar,
+    body .pillar.is-visible { opacity: 1; transform: translateY(0); }
+    .pillar:hover {
+      border-color: var(--terracotta);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+    .pillar::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, var(--terracotta) 0%, var(--azure) 100%);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.5s var(--ease);
+    }
+    .pillar:hover::before { transform: scaleX(1); }
+
+    .pillar__num {
+      position: absolute;
+      top: 1rem; right: 1.4rem;
+      font-family: var(--font-display);
+      font-size: 3.5rem;
+      font-weight: 600;
+      line-height: 1;
+      color: var(--line);
+      letter-spacing: -0.02em;
+      user-select: none;
+    }
+    .pillar__icon {
+      display: inline-flex;
+      width: 64px; height: 64px;
+      align-items: center; justify-content: center;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--paper), var(--cream-warm));
+      border: 1px solid var(--line);
+      margin-bottom: 1.2rem;
+      position: relative;
+      z-index: 1;
+    }
+    .pillar__icon .icon svg { width: 30px; height: 30px; }
+
+    .pillar__label {
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--terracotta);
+      margin-bottom: 0.7rem;
+    }
+    .pillar__text {
+      font-family: var(--font-display);
+      font-size: clamp(1.1rem, 0.95rem + 0.5vw, 1.25rem);
+      font-weight: 500;
+      line-height: 1.35;
+      color: var(--ink);
+      letter-spacing: -0.005em;
+    }
+
+    .about__credentials {
+      display: flex; flex-wrap: wrap; gap: 0.7rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+    .about__credential {
+      display: inline-flex; align-items: center; gap: 0.55rem;
+      padding: 0.55em 1em;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+
+    @media (max-width: 900px) {
+      .pillars { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 780px) {
+      .about__grid { grid-template-columns: 1fr; }
+      .about__quote { padding: 2rem 0 0; text-align: center; }
+      .about__tagline { margin-left: auto; margin-right: auto; }
+      .about__quote-rule { margin: 0 auto; }
+    }
+
+    /* ============ TOURS ============ */
+    .tours { padding: clamp(4rem, 8vw, 7rem) 0; background: var(--paper); }
+    .tours__intro {
+      text-align: center;
+      max-width: 560px;
+      margin: 0 auto 2.5rem;
+      color: var(--text-mute);
+    }
+    .chips-wrap {
+      position: relative;
+      margin: 0 calc(clamp(1.25rem, 4vw, 2.5rem) * -1) 3rem;
+      padding: 0 clamp(1.25rem, 4vw, 2.5rem);
+    }
+    .chips {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 500;
+      line-height: 1;
+      padding: 0.7em 1.2em 0.7em 0.85em;
+      border-radius: 999px;
+      border: 1.5px solid var(--line);
+      background: var(--cream);
+      color: var(--text-mute);
+      transition: all 0.25s var(--ease);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .chip__icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--paper), var(--cream-warm));
+      border: 1px solid var(--line);
+      transition: all 0.25s var(--ease);
+      flex-shrink: 0;
+    }
+    .chip__icon svg {
+      width: 16px; height: 16px;
+      stroke: var(--grad, url(#grad-azure-terra));
+      transition: stroke 0.2s;
+    }
+    .chip__text {
+      display: inline-block;
+      color: inherit;
+    }
+
+    .chip:not(.chip--active):hover {
+      border-color: var(--ink);
+      color: var(--ink);
+      transform: translateY(-1px);
+    }
+    .chip:not(.chip--active):hover .chip__icon {
+      background: var(--cream);
+      border-color: var(--ink);
+    }
+
+    .chip--active,
+    .chip--active:hover {
+      background: var(--ink);
+      color: var(--cream);
+      border-color: var(--ink);
+      box-shadow: 0 4px 16px -4px rgba(30, 24, 18, 0.3);
+      transform: none;
+    }
+    .chip--active .chip__icon,
+    .chip--active:hover .chip__icon {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.28);
+    }
+    .chip--active .chip__icon svg,
+    .chip--active:hover .chip__icon svg {
+      stroke: var(--cream) !important;
+    }
+
+    /* Horizontal scroll on mobile */
+    @media (max-width: 720px) {
+      .chips-wrap {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+        scrollbar-width: none;
+        mask-image: linear-gradient(90deg,
+          transparent 0,
+          #000 clamp(1.25rem, 4vw, 2.5rem),
+          #000 calc(100% - clamp(1.25rem, 4vw, 2.5rem)),
+          transparent 100%);
+        -webkit-mask-image: linear-gradient(90deg,
+          transparent 0,
+          #000 clamp(1.25rem, 4vw, 2.5rem),
+          #000 calc(100% - clamp(1.25rem, 4vw, 2.5rem)),
+          transparent 100%);
+      }
+      .chips-wrap::-webkit-scrollbar { display: none; }
+      .chips {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        gap: 0.5rem;
+        padding-bottom: 4px;
+      }
+      .chip {
+        scroll-snap-align: start;
+        flex-shrink: 0;
+        font-size: 0.85rem;
+        padding: 0.55em 1em 0.55em 0.55em;
+      }
+      .chip__icon { width: 26px; height: 26px; }
+    }
+
+    .tours__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    .card {
+      background: var(--cream);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: all 0.35s var(--ease);
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    .card.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: var(--delay, 0s);
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--text-soft);
+    }
+    .card__media {
+      position: relative;
+      aspect-ratio: 16/10;
+      overflow: hidden;
+    }
+    .card__media img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.6s var(--ease);
+    }
+    .card:hover .card__media img { transform: scale(1.04); }
+    .card__cat {
+      position: absolute; top: 0.9rem; left: 0.9rem;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.35em 0.8em;
+      background: rgba(254, 252, 247, 0.92);
+      backdrop-filter: blur(8px);
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--text);
+    }
+
+    .card__body {
+      padding: 1.4rem 1.4rem 1.2rem;
+      display: flex; flex-direction: column; flex: 1;
+    }
+    .card__title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 500;
+      line-height: 1.15;
+      color: var(--ink);
+      margin-bottom: 0.35rem;
+    }
+    .card__subtitle {
+      font-size: 0.88rem;
+      color: var(--terracotta);
+      
+      margin-bottom: 0.9rem;
+    }
+    .card__desc {
+      font-size: 0.92rem;
+      color: var(--text-mute);
+      line-height: 1.55;
+      margin-bottom: 1rem;
+    }
+    .card__meta {
+      display: flex; flex-wrap: wrap; gap: 0.9rem;
+      font-size: 0.82rem; color: var(--text-soft);
+      margin-top: auto;
+      padding-top: 0.5rem;
+    }
+    .card__meta-item { display: inline-flex; align-items: center; gap: 0.35rem; }
+    .card__extras {
+      font-size: 0.78rem; color: var(--text-soft);
+      
+      margin-top: 0.5rem;
+    }
+    .card__footer {
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+      gap: 0.75rem;
+      margin-top: 1.2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+    }
+    .card__price {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .card__actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+    /* ============ COUCH ============ */
+    .couch {
+      padding: clamp(3rem, 6vw, 5rem) 0;
+      background: linear-gradient(135deg, var(--azure-deep) 0%, var(--azure) 100%);
+      color: #fff;
+    }
+    .couch__inner {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 2.5rem;
+      align-items: center;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s var(--ease);
+    }
+    .couch__inner.is-visible { opacity: 1; transform: translateY(0); }
+    .couch__icon-wrap {
+      width: 90px; height: 90px;
+      display: grid; place-items: center;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .couch .section-title { color: #fff; font-size: clamp(1.6rem, 1.2rem + 1.5vw, 2.4rem); }
+    .couch .kicker { color: rgba(255, 240, 210, 0.85); }
+    .couch__text p:last-child { color: rgba(255,255,255,0.85); }
+    @media (max-width: 780px) {
+      .couch__inner { grid-template-columns: 1fr; text-align: center; gap: 1.5rem; }
+      .couch__icon-wrap { margin: 0 auto; }
+    }
+
+    /* ============ FORM ============ */
+    .form-section { padding: clamp(4rem, 8vw, 7rem) 0; }
+    .form-section__grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: clamp(2rem, 5vw, 4.5rem);
+      align-items: start;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+    .form-section__info { opacity: 0; transform: translateY(20px); transition: all 0.8s var(--ease); }
+    .form-section__info.is-visible { opacity: 1; transform: translateY(0); }
+    .form-section__lead {
+      color: var(--text-mute);
+      margin-bottom: 2rem;
+      max-width: 420px;
+    }
+    .form-section__perks {
+      list-style: none;
+      display: flex; flex-direction: column;
+      gap: 0.9rem;
+    }
+    .form-section__perks li {
+      display: inline-flex; align-items: center; gap: 0.7rem;
+      font-size: 0.92rem;
+      color: var(--text);
+    }
+
+    .form {
+      background: var(--cream);
+      padding: clamp(1.5rem, 3vw, 2.2rem);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-sm);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s var(--ease) 0.1s;
+    }
+    .form.is-visible { opacity: 1; transform: translateY(0); }
+    .form__group { margin-bottom: 1.1rem; }
+    .form__group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--text-mute);
+      margin-bottom: 0.4rem;
+    }
+    .form__group input,
+    .form__group select,
+    .form__group textarea {
+      width: 100%;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      padding: 0.75rem 0.9rem;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .form__group input:focus,
+    .form__group select:focus,
+    .form__group textarea:focus {
+      outline: none;
+      border-color: var(--azure);
+      background: #fff;
+    }
+    .form__group textarea { resize: vertical; min-height: 100px; }
+    @media (max-width: 780px) {
+      .form-section__grid { grid-template-columns: 1fr; }
+    }
+
+    /* ============ CONTACT ============ */
+    .contact { padding: clamp(4rem, 8vw, 6rem) 0; background: var(--paper); }
+    .contact__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 2.5rem;
+    }
+    .contact__card {
+      display: flex; flex-direction: column; gap: 0.4rem;
+      padding: 1.4rem;
+      background: var(--cream);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      transition: all 0.25s var(--ease);
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    .contact__card.is-visible { opacity: 1; transform: translateY(0); }
+    .contact__card:hover {
+      transform: translateY(-3px);
+      border-color: var(--text);
+      box-shadow: var(--shadow-sm);
+    }
+    .contact__icon {
+      display: inline-flex;
+      width: 32px; height: 32px;
+      margin-bottom: 0.3rem;
+    }
+    .contact__icon svg { stroke: url(#grad-azure-terra); width: 100%; height: 100%; }
+    .contact__label { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-soft); }
+    .contact__value { font-size: 0.95rem; color: var(--text); word-break: break-word; }
+    .contact__card--whatsapp { border-color: rgba(37, 211, 102, 0.3); background: linear-gradient(135deg, var(--cream), #e8f7ec); }
+
+    /* ============ FOOTER ============ */
+    .footer {
+      background: var(--ink);
+      color: rgba(245, 239, 226, 0.85);
+      padding: 4rem 0 1.5rem;
+    }
+    .footer__grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1.2fr;
+      gap: 3rem;
+    }
+    .footer__logo {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 500;
+      color: #fff;
+      margin-bottom: 0.3rem;
+    }
+    .footer__tagline { font-size: 0.88rem; opacity: 0.7; margin-bottom: 1.5rem; max-width: 300px; }
+    .footer__social { display: flex; gap: 0.75rem; }
+    .footer__social a {
+      width: 40px; height: 40px;
+      display: grid; place-items: center;
+      border: 1px solid rgba(245, 239, 226, 0.2);
+      border-radius: 50%;
+      color: rgba(245, 239, 226, 0.85);
+      transition: all 0.25s;
+    }
+    .footer__social a:hover {
+      background: var(--terracotta);
+      border-color: var(--terracotta);
+      color: #fff;
+    }
+    .footer__social svg { width: 18px; height: 18px; }
+
+    .footer__heading {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      color: #fff;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+    .footer__list { list-style: none; }
+    .footer__list li { margin-bottom: 0.5rem; }
+    .footer__list a { color: rgba(245, 239, 226, 0.8); font-size: 0.9rem; }
+    .footer__list a:hover { color: #fff; }
+
+    .footer__license {
+      display: flex; gap: 1rem; align-items: center;
+      color: rgba(245, 239, 226, 0.85);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+    .footer__license img {
+      width: 96px; height: 96px;
+      background: #fff;
+      padding: 6px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    .footer__license-url { margin-top: 0.3rem; opacity: 0.7; font-size: 0.7rem; word-break: break-all; }
+
+    .footer__bottom {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(245, 239, 226, 0.08);
+      display: flex; justify-content: space-between; flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.78rem;
+      color: rgba(245, 239, 226, 0.55);
+    }
+    .footer__legal {  }
+
+    @media (max-width: 780px) {
+      .footer__grid { grid-template-columns: 1fr; gap: 2rem; }
+    }
+
+    /* ============ MODAL ============ */
+    .modal {
+      width: min(680px, 92vw);
+      max-height: 88vh;
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 0;
+      background: var(--cream);
+      box-shadow: var(--shadow-lg);
+      color: var(--text);
+      /* centering */
+      margin: auto;
+      inset: 0;
+      /* entry/exit animation */
+      opacity: 0;
+      transform: translateY(16px) scale(0.96);
+      transition:
+        opacity 0.35s var(--ease),
+        transform 0.35s var(--ease),
+        overlay 0.35s var(--ease) allow-discrete,
+        display 0.35s var(--ease) allow-discrete;
+    }
+    .modal[open] {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    @starting-style {
+      .modal[open] {
+        opacity: 0;
+        transform: translateY(16px) scale(0.96);
+      }
+    }
+    .modal::backdrop {
+      background: rgba(13, 74, 94, 0.6);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      opacity: 0;
+      transition:
+        opacity 0.35s var(--ease),
+        overlay 0.35s var(--ease) allow-discrete,
+        display 0.35s var(--ease) allow-discrete;
+    }
+    .modal[open]::backdrop { opacity: 1; }
+    @starting-style {
+      .modal[open]::backdrop { opacity: 0; }
+    }
+
+    /* Mobile: bottom sheet */
+    @media (max-width: 720px) {
+      .modal {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        inset: auto 0 0 0;
+        max-height: 92vh;
+        border-radius: 20px 20px 0 0;
+        transform: translateY(100%);
+      }
+      .modal[open] { transform: translateY(0); }
+      @starting-style {
+        .modal[open] { transform: translateY(100%); }
+      }
+      .modal__body {
+        max-height: calc(92vh - 1rem);
+        padding-top: 2rem;
+      }
+      .modal__body::before {
+        content: '';
+        position: absolute;
+        top: 0.55rem; left: 50%;
+        width: 40px; height: 4px;
+        background: var(--line);
+        border-radius: 999px;
+        transform: translateX(-50%);
+      }
+    }
+    .modal__close {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      width: 36px; height: 36px;
+      display: grid; place-items: center;
+      background: var(--paper);
+      border-radius: 50%;
+      color: var(--text);
+      transition: background 0.2s;
+      z-index: 2;
+    }
+    .modal__close:hover { background: var(--line); }
+    .modal__body {
+      padding: clamp(1.5rem, 4vw, 2.5rem);
+      overflow-y: auto;
+      max-height: 88vh;
+    }
+    .modal__kicker {
+      font-size: 0.74rem; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--terracotta);
+      margin-bottom: 0.5rem;
+    }
+    .modal__title {
+      font-family: var(--font-display);
+      font-size: clamp(1.7rem, 1.4rem + 1vw, 2.3rem);
+      font-weight: 500;
+      line-height: 1.1;
+      color: var(--ink);
+      margin-bottom: 0.4rem;
+      padding-right: 2.5rem;
+    }
+    .modal__subtitle {
+      font-family: var(--font-display);
+      
+      font-size: 1.1rem;
+      color: var(--terracotta);
+      margin-bottom: 1.4rem;
+    }
+    .modal__meta {
+      display: flex; flex-wrap: wrap; gap: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-mute);
+      margin-bottom: 1.4rem;
+      padding-bottom: 1.4rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .modal__long {
+      color: var(--text-mute);
+      line-height: 1.7;
+    }
+    .modal__long p { margin-bottom: 0.85rem; }
+    .modal__long ul { list-style: none; padding-left: 0; margin-bottom: 1rem; }
+    .modal__long li { position: relative; padding-left: 1.3rem; margin-bottom: 0.45rem; }
+    .modal__long li::before {
+      content: '';
+      position: absolute; left: 0; top: 0.65em;
+      width: 6px; height: 6px;
+      background: var(--terracotta);
+      border-radius: 50%;
+    }
+    .modal__long strong { color: var(--ink); }
+    .modal__extras {
+      margin-top: 1.2rem;
+      padding: 0.7rem 1rem;
+      background: var(--paper);
+      border-left: 3px solid var(--terracotta);
+      border-radius: 4px;
+      font-size: 0.88rem;
+      color: var(--text-mute);
+    }
+    .modal__cta {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1rem;
+      margin-top: 1.8rem;
+      padding-top: 1.4rem;
+      border-top: 1px solid var(--line);
+    }
+    .modal__price {
+      font-family: var(--font-display);
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
   </style>
-</head>
-<body>
-  <h1>Маша Шишкова</h1>
-  <p>Выберите версию дизайна для просмотра</p>
-  <div class="versions">
-    <a href="/dev/v1/">
-      Версия 1
-      <span>Золотая Классика</span>
-    </a>
-    <a href="/dev/v2/">
-      Версия 2
-      <span>Средиземноморская Свежесть</span>
-    </a>
-    <a href="/dev/v3/">
-      Версия 3
-      <span>Дольче Вита</span>
-    </a>
-  </div>
 </body>
 </html>

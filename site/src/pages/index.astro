@@ -910,6 +910,15 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       setLang(nextLang);
     });
 
+    // ====== Force polaroid video to play when visible ======
+    document.querySelectorAll('.polaroid__video').forEach(v => {
+      const tryPlay = () => { v.play().catch(() => {}); };
+      tryPlay();
+      new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) tryPlay(); });
+      }, { threshold: 0.1 }).observe(v);
+    });
+
     // ====== Scroll reveal ======
     const reveal = new IntersectionObserver((entries) => {
       entries.forEach(en => {
@@ -1437,10 +1446,6 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
     @media (min-width: 781px) {
       .polaroid__video { display: block; }
       .polaroid__img   { display: none; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .polaroid__video { display: none; }
-      .polaroid__img   { display: block; }
     }
 
     .polaroid__caption {

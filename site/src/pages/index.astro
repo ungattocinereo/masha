@@ -1437,15 +1437,14 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       width: 100%; height: 100%;
       object-fit: cover;
       filter: saturate(0.92) contrast(1.02);
-      display: block;
     }
     /* Mobile (default): show image, hide video */
-    .polaroid__video { display: none; }
-    .polaroid__img   { display: block; }
+    .polaroid__photo .polaroid__video { display: none; }
+    .polaroid__photo .polaroid__img   { display: block; }
     /* Desktop: swap — show video, hide image */
     @media (min-width: 781px) {
-      .polaroid__video { display: block; }
-      .polaroid__img   { display: none; }
+      .polaroid__photo .polaroid__video { display: block; }
+      .polaroid__photo .polaroid__img   { display: none; }
     }
 
     .polaroid__caption {

@@ -182,13 +182,16 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
             <span class="polaroid__tape polaroid__tape--left" aria-hidden="true"></span>
             <span class="polaroid__tape polaroid__tape--right" aria-hidden="true"></span>
             <div class="polaroid__photo">
+              <div class="polaroid__loader" aria-hidden="true">
+                <span class="spinner"></span>
+              </div>
               <video class="polaroid__video"
                      autoplay muted loop playsinline
                      preload="auto"
                      poster="/images/masha.jpg"
                      aria-label={about.name}>
                 <source src="/video/masha-vert.mp4" type="video/mp4" />
-                <img class="polaroid__img" src="/images/masha.jpg" alt={about.name} />
+                <img src="/images/masha.jpg" alt={about.name} />
               </video>
             </div>
             <div class="polaroid__caption">
@@ -911,8 +914,13 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       setLang(nextLang);
     });
 
-    // ====== Force polaroid video to play when visible ======
+    // ====== Polaroid video: force play + preloader ======
     document.querySelectorAll('.polaroid__video').forEach(v => {
+      const loader = v.parentElement?.querySelector('.polaroid__loader');
+      const hideLoader = () => { loader?.classList.add('is-loaded'); };
+      v.addEventListener('playing', hideLoader, { once: true });
+      if (!v.paused && v.readyState >= 2) hideLoader();
+
       const tryPlay = () => { v.play().catch(() => {}); };
       tryPlay();
       new IntersectionObserver((entries) => {
@@ -1378,6 +1386,61 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       .hero__scroll { animation: none; }
     }
 
+    /* ============ HERO MOBILE (two-part: image top + text bottom) ============ */
+    @media (max-width: 720px) {
+      .hero {
+        flex-direction: column;
+        min-height: auto;
+        align-items: stretch;
+      }
+      .hero__bg {
+        position: relative;
+        inset: auto;
+        aspect-ratio: 4/3;
+        flex-shrink: 0;
+        background-position: top center;
+        animation: none;
+      }
+      .hero__bg::after {
+        content: '';
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        height: 50%;
+        background: linear-gradient(to top, var(--azure-deep), transparent);
+        pointer-events: none;
+        z-index: 1;
+      }
+      .hero__overlay { display: none; }
+      .hero__content {
+        position: relative;
+        z-index: auto;
+        background: linear-gradient(180deg, var(--azure-deep) 0%, var(--ink) 100%);
+        padding: 2rem clamp(1.25rem, 5vw, 2rem) 3rem;
+        max-width: none;
+        animation: none;
+      }
+      .hero__title {
+        font-size: clamp(2.4rem, 8vw, 3.2rem);
+        margin-bottom: 1rem;
+      }
+      .hero__over { margin-bottom: 1rem; }
+      .hero__tagline {
+        font-size: 1.05rem;
+        margin-bottom: 1.8rem;
+      }
+      .hero__actions { margin-bottom: 2rem; }
+      .hero__actions .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .hero__license {
+        width: 100%;
+        justify-content: center;
+        font-size: 0.72rem;
+      }
+      .hero__scroll { display: none; }
+    }
+
     /* ============ ABOUT ============ */
     .about { padding: clamp(4rem, 8vw, 7rem) 0; }
     .about__head { text-align: center; margin-bottom: clamp(2.5rem, 5vw, 4rem); }
@@ -1441,6 +1504,27 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       filter: saturate(0.92) contrast(1.02);
       display: block;
     }
+
+    /* Video preloader spinner */
+    .polaroid__loader {
+      position: absolute; inset: 0;
+      display: grid; place-items: center;
+      background: #e8e2d2;
+      z-index: 3;
+      transition: opacity 0.5s ease;
+    }
+    .polaroid__loader.is-loaded {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .spinner {
+      width: 28px; height: 28px;
+      border: 2.5px solid var(--line);
+      border-top-color: var(--terracotta);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .polaroid__caption {
       margin-top: 16px;

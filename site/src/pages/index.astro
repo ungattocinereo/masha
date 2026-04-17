@@ -182,12 +182,13 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
             <span class="polaroid__tape polaroid__tape--left" aria-hidden="true"></span>
             <span class="polaroid__tape polaroid__tape--right" aria-hidden="true"></span>
             <div class="polaroid__photo">
-              <img class="polaroid__img" src="/images/masha.jpg" alt={about.name} />
               <video class="polaroid__video"
                      autoplay muted loop playsinline
-                     preload="metadata"
-                     poster="/images/masha.jpg">
+                     preload="auto"
+                     poster="/images/masha.jpg"
+                     aria-label={about.name}>
                 <source src="/video/masha-vert.mp4" type="video/mp4" />
+                <img class="polaroid__img" src="/images/masha.jpg" alt={about.name} />
               </video>
             </div>
             <div class="polaroid__caption">
@@ -1433,19 +1434,12 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       pointer-events: none;
       opacity: 0.5;
     }
-    .polaroid__photo img,
     .polaroid__photo video {
       width: 100%; height: 100%;
       object-fit: cover;
+      object-position: center;
       filter: saturate(0.92) contrast(1.02);
-    }
-    /* Mobile (default): show image, hide video */
-    .polaroid__photo .polaroid__video { display: none; }
-    .polaroid__photo .polaroid__img   { display: block; }
-    /* Desktop: swap — show video, hide image */
-    @media (min-width: 781px) {
-      .polaroid__photo .polaroid__video { display: block; }
-      .polaroid__photo .polaroid__img   { display: none; }
+      display: block;
     }
 
     .polaroid__caption {

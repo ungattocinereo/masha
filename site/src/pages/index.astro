@@ -61,8 +61,109 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Маша Шишкова — лицензированный гид по Кампании</title>
-  <meta name="description" content="Авторские экскурсии по Неаполю, Помпеям, Амальфитанскому побережью, Капри и Пестуму. Лицензия Regione Campania." />
+
+  <!-- SEO: title & description -->
+  <title>Маша Шишкова — лицензированный гид по Неаполю, Помпеям и Амальфи</title>
+  <meta name="description" content="Авторские экскурсии по Неаполю, Помпеям, Геркулануму, Амальфитанскому побережью, Равелло и Капри. Квесты для детей, дегустации, морские прогулки. Лицензированный гид Regione Campania." />
+  <link rel="canonical" href="https://masha.amalfi.day/" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Alternate language -->
+  <link rel="alternate" hreflang="ru" href="https://masha.amalfi.day/" />
+  <link rel="alternate" hreflang="en" href="https://masha.amalfi.day/" />
+  <link rel="alternate" hreflang="x-default" href="https://masha.amalfi.day/" />
+
+  <!-- Theme & mobile -->
+  <meta name="theme-color" content="#1a6b8a" />
+  <meta name="msapplication-TileColor" content="#1a6b8a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- Open Graph (Facebook, Instagram, WhatsApp, Telegram) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://masha.amalfi.day/" />
+  <meta property="og:title" content="Маша Шишкова — гид по Неаполю, Помпеям и Амальфи" />
+  <meta property="og:description" content="Авторские экскурсии по южной Италии. Неаполь, Помпеи, Геркуланум, Амальфитанское побережье, Равелло, Капри. Квесты, дегустации, морские прогулки. Лицензия Regione Campania." />
+  <meta property="og:image" content="https://masha.amalfi.day/images/bg-hero.jpg" />
+  <meta property="og:image:width" content="2680" />
+  <meta property="og:image:height" content="1568" />
+  <meta property="og:image:alt" content="Амальфитанское побережье — экскурсии с Машей Шишковой" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:locale:alternate" content="en_US" />
+  <meta property="og:site_name" content="Маша Шишкова — гид" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Маша Шишкова — гид по Неаполю, Помпеям и Амальфи" />
+  <meta name="twitter:description" content="Авторские экскурсии по южной Италии. Лицензированный гид Regione Campania. Квесты, дегустации, морские прогулки." />
+  <meta name="twitter:image" content="https://masha.amalfi.day/images/bg-hero.jpg" />
+  <meta name="twitter:image:alt" content="Амальфитанское побережье — экскурсии с Машей Шишковой" />
+
+  <!-- Keywords (secondary signal) -->
+  <meta name="keywords" content="гид Неаполь, экскурсии Помпеи, Амальфи побережье, Равелло, Капри, Геркуланум, лицензированный гид Кампания, Маша Шишкова, экскурсии Италия, квесты Неаполь, гастротур Неаполь, морская прогулка Амальфи" />
+
+  <!-- Structured Data: JSON-LD -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "TouristTrip",
+    "name": "Авторские экскурсии по южной Италии — Маша Шишкова",
+    "description": "Лицензированный гид по Неаполю, Помпеям, Геркулануму, Амальфитанскому побережью, Равелло и Капри. Авторские экскурсии, квесты для детей, дегустации, морские прогулки.",
+    "url": "https://masha.amalfi.day/",
+    "image": "https://masha.amalfi.day/images/bg-hero.jpg",
+    "touristType": ["Cultural", "Food", "Family", "Adventure"],
+    "provider": {
+      "@type": "Person",
+      "name": "Маша Шишкова",
+      "alternateName": "Masha Shishkova",
+      "jobTitle": "Лицензированный гид",
+      "url": "https://masha.amalfi.day/",
+      "image": "https://masha.amalfi.day/images/masha.jpg",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Maiori",
+        "addressRegion": "Campania",
+        "addressCountry": "IT"
+      },
+      "telephone": "+79219594978",
+      "email": contacts.email,
+      "sameAs": [
+        contacts.instagram,
+        contacts.facebook,
+        contacts.telegram
+      ],
+      "hasCredential": {
+        "@type": "EducationalOccupationalCredential",
+        "credentialCategory": "license",
+        "name": "Licenza guida turistica Regione Campania",
+        "url": about.licenseUrl
+      },
+      "knowsLanguage": ["ru", "it", "en"]
+    },
+    "offers": {
+      "@type": "AggregateOffer",
+      "priceCurrency": "EUR",
+      "lowPrice": "40",
+      "highPrice": "1500",
+      "offerCount": tours.length.toString()
+    },
+    "availableLanguage": ["Russian", "English", "Italian"],
+    "contentLocation": {
+      "@type": "Place",
+      "name": "Campania, Italy",
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 40.6333,
+        "longitude": 14.6029
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressRegion": "Campania",
+        "addressCountry": "IT"
+      }
+    }
+  })} />
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Cormorant+Infant:wght@400;500;600;700&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet" />

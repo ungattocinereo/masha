@@ -4,8 +4,14 @@ import { tours, categories, about, contacts } from '../data/tours';
 const ruTours = tours.filter(t => t.lang !== 'en');
 const enTours = tours.filter(t => t.lang === 'en');
 
+const tourHasCategory = (t: typeof tours[number], catId: string) =>
+  t.category === catId || (t.extraCategories?.includes(catId) ?? false);
+
+const tourCategoryList = (t: typeof tours[number]) =>
+  [t.category, ...(t.extraCategories ?? [])].join(' ');
+
 const visibleCategories = categories.filter(cat =>
-  ruTours.some(t => t.category === cat.id)
+  ruTours.some(t => tourHasCategory(t, cat.id))
 );
 
 const licenseUrl = about.licenseUrl;
@@ -162,6 +168,15 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       }
     }
   })} />
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2B105VCL69"></script>
+  <script is:inline>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-2B105VCL69');
+  </script>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -383,7 +398,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
           const cat = categories.find(c => c.id === tour.category);
           const gradId = gradForCategory(tour.category);
           return (
-            <article class="card" data-category={tour.category} style={`--delay: ${(idx % 9) * 0.05}s`}>
+            <article class="card" data-category={tourCategoryList(tour)} style={`--delay: ${(idx % 9) * 0.05}s`}>
               <div class="card__media">
                 <img src={tour.image} alt={tour.title} loading="lazy" />
                 <span class="card__cat">
@@ -446,7 +461,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
         {enTours.map((tour) => {
           const cat = categories.find(c => c.id === tour.category);
           return (
-            <article class="card" data-category={tour.category}>
+            <article class="card" data-category={tourCategoryList(tour)}>
               <div class="card__media">
                 <img src={tour.image} alt={tour.title} loading="lazy" />
                 <span class="card__cat">
@@ -531,6 +546,9 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
             {visibleCategories.map((cat) => (
               <optgroup label={cat.name} data-cat-id={cat.id} data-i18n-label={`category.${cat.id}`}>
                 {ruTours.filter(t => t.category === cat.id).map(t => (
+                  <option value={t.title}>{t.title} — {t.price}</option>
+                ))}
+                {ruTours.filter(t => t.category !== cat.id && t.extraCategories?.includes(cat.id)).map(t => (
                   <option value={t.title}>{t.title} — {t.price}</option>
                 ))}
               </optgroup>
@@ -687,7 +705,8 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       chip.classList.add('chip--active');
       const cat = chip.dataset.category;
       cards.forEach(card => {
-        const show = cat === 'all' || card.dataset.category === cat;
+        const cats = (card.dataset.category || '').split(/\s+/).filter(Boolean);
+        const show = cat === 'all' || cats.includes(cat);
         card.style.display = show ? '' : 'none';
       });
     }));
@@ -832,12 +851,13 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
         'about.pillar2.label': 'Формат',
         'about.pillar2.text':  'Интеллектуальные прогулки с захватывающими подробностями, иронией и юмором.',
         'about.pillar3.label': 'Для любопытных',
-        'about.pillar3.text':  'Квесты для любознательных детей, дегустации.',
+        'about.pillar3.text':  'Квесты, трекинг, дегустации.',
         'polaroid.name': 'Маша Шишкова',
         'polaroid.role': 'Лицензированный гид · Санкт-Петербург · Амальфи',
         'credential.0': 'Институт иностранных языков',
-        'credential.1': 'Майори, Амальфитанское побережье',
-        'credential.2': 'Лицензия Regione Campania',
+        'credential.1': 'Курсы гидов-переводчиков (итальянский), Санкт-Петербург',
+        'credential.2': 'Майори, Амальфитанское побережье',
+        'credential.3': 'Лицензия Regione Campania',
         'tours.kicker': 'Маршруты',
         'tours.title':  'Экскурсии и туры',
         'tours.intro':  'Каждый маршрут — авторский. От двухчасовой прогулки до многодневного путешествия по Кампании.',
@@ -908,12 +928,13 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
         'about.pillar2.label': 'Format',
         'about.pillar2.text':  'Intellectual walks with captivating details, irony and humor.',
         'about.pillar3.label': 'For the curious',
-        'about.pillar3.text':  'Quests for curious kids, tastings.',
+        'about.pillar3.text':  'Quests, trekking, tastings.',
         'polaroid.name': 'Masha Shishkova',
         'polaroid.role': 'Licensed guide · St. Petersburg · Amalfi',
         'credential.0': 'Institute of Foreign Languages',
-        'credential.1': 'Maiori, Amalfi Coast',
-        'credential.2': 'Regione Campania license',
+        'credential.1': 'Interpreter-guide courses (Italian), St. Petersburg',
+        'credential.2': 'Maiori, Amalfi Coast',
+        'credential.3': 'Regione Campania license',
         'tours.kicker': 'Itineraries',
         'tours.title':  'Tours & itineraries',
         'tours.intro':  'Every itinerary is original. From a two-hour walk to a multi-day journey across Campania.',

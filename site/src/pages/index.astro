@@ -14,6 +14,25 @@ const visibleCategories = categories.filter(cat =>
   ruTours.some(t => tourHasCategory(t, cat.id))
 );
 
+const enTour = enTours[0];
+
+const mdToHtmlServer = (s: string | undefined): string => {
+  if (!s) return '';
+  const inline = (t: string) => t
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>');
+  return s.split(/\n{2,}/).map(block => {
+    if (/^[•*\-]\s/m.test(block)) {
+      const items = block.split(/\n/).filter(Boolean).map(line => {
+        const cleaned = line.replace(/^[•*\-]\s*/, '').trim();
+        return cleaned ? `<li>${inline(cleaned)}</li>` : '';
+      }).join('');
+      return `<ul>${items}</ul>`;
+    }
+    return `<p>${inline(block).replace(/\n/g, '<br>')}</p>`;
+  }).join('');
+};
+
 const licenseUrl = about.licenseUrl;
 const qrSrc = '/images/ministry-qr.svg';
 
@@ -243,8 +262,10 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
 
     <div class="hero__content">
       <p class="hero__over">
-        <span data-i18n="hero.over1">ЛИЦЕНЗИРОВАННЫЙ ГИД</span>
-        <span data-i18n="hero.over2">в регионе Кампания</span>
+        <span class="hero__over-rule" aria-hidden="true"></span>
+        <span class="hero__over-label" data-i18n="hero.over1">ЛИЦЕНЗИРОВАННЫЙ ГИД</span>
+        <span class="hero__over-sep" aria-hidden="true">·</span>
+        <span class="hero__over-sub" data-i18n="hero.over2">в регионе Кампания</span>
       </p>
 
       <h1 class="hero__title" data-i18n="hero.name">{about.name}</h1>
@@ -252,7 +273,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       <p class="hero__geo">
         {about.geo.map((place, i) => (
           <>
-            {i > 0 && <span class="hero__geo-sep">·</span>}
+            {i > 0 && <span class="hero__geo-sep" aria-hidden="true">—</span>}
             <span data-i18n={`geo.${i}`}>{place}</span>
           </>
         ))}
@@ -267,15 +288,13 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
         </a>
         <a href={`https://wa.me/${contacts.whatsappNumber}?text=${encodeURIComponent('Здравствуйте, Маша!')}`}
            target="_blank" rel="noopener"
-           class="btn btn--outline" data-i18n="hero.cta.secondary">Написать в WhatsApp</a>
+           class="hero__whatsapp" data-i18n="hero.cta.secondary">Написать в WhatsApp</a>
       </div>
 
       <a class="hero__license" href={licenseUrl} target="_blank" rel="noopener">
-        <img class="hero__license-qr" src={qrSrc} alt="QR" width="56" height="56" data-i18n-alt="hero.license.qrAlt" />
-        <span class="hero__license-text">
-          <span class="hero__license-label" data-i18n="hero.license.label">Лицензия Regione Campania</span>
-          <span class="hero__license-url">portaleprofessioni.ministeroturismo.gov.it</span>
-        </span>
+        <svg class="hero__license-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        <span data-i18n="hero.license.label">Лицензия Regione Campania</span>
+        <span class="hero__license-arrow" aria-hidden="true">↗</span>
       </a>
     </div>
 
@@ -379,8 +398,8 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       <h2 class="section-title section-title--center" data-i18n="tours.title">Экскурсии и туры</h2>
       <p class="tours__intro" data-i18n="tours.intro">Каждый маршрут — авторский. От двухчасовой прогулки до многодневного путешествия по Кампании.</p>
 
-      <!-- Category chips -->
-      <div class="chips-wrap">
+      <!-- Category chips (RU only — the EN version shows a single featured tour) -->
+      <div class="chips-wrap" data-lang-only="ru">
         <div class="chips" role="tablist">
           <button class="chip chip--active" data-category="all" role="tab">
             <span class="chip__icon" set:html={iconSvg('layers')} />
@@ -469,58 +488,43 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
         })}
       </div>
 
-      <!-- English tours grid -->
-      <div class="tours__grid" data-lang-only="en">
-        {enTours.map((tour) => {
-          const cat = categories.find(c => c.id === tour.category);
-          return (
-            <article class="card" data-category={tourCategoryList(tour)}>
-              {tour.externalUrl ? (
-                <a class="card__media" href={tour.externalUrl} target="_blank" rel="noopener">
-                  <img src={tour.image} alt={tour.title} loading="lazy" />
-                  <span class="card__cat">
-                    <span class="icon icon--sm" set:html={iconSvg(cat?.icon || 'sparkles')} />
-                    {cat?.name}
-                  </span>
-                </a>
-              ) : (
-                <button type="button" class="card__media card__media--clickable" data-modal-open data-tour-id={tour.id} aria-label={tour.title}>
-                  <img src={tour.image} alt={tour.title} loading="lazy" />
-                  <span class="card__cat">
-                    <span class="icon icon--sm" set:html={iconSvg(cat?.icon || 'sparkles')} />
-                    {cat?.name}
-                  </span>
-                </button>
+      <!-- English featured tour — single tour, fully expanded -->
+      {enTour && (
+        <article class="tour-feature" data-lang-only="en">
+          <div class="tour-feature__media">
+            <img src={enTour.image} alt={enTour.title} loading="lazy" />
+          </div>
+          <div class="tour-feature__body">
+            <h3 class="tour-feature__title">{enTour.title}</h3>
+            <p class="tour-feature__subtitle">{enTour.subtitle}</p>
+            <div class="tour-feature__meta">
+              <span class="tour-feature__meta-item">
+                <span class="icon icon--xs" set:html={iconSvg('clock')} />
+                {enTour.duration}
+              </span>
+              {enTour.maxPeople && (
+                <span class="tour-feature__meta-item">
+                  <span class="icon icon--xs" set:html={iconSvg('users')} />
+                  {enTour.maxPeople}
+                </span>
               )}
-              <div class="card__body">
-                <h3 class="card__title">{tour.title}</h3>
-                <p class="card__subtitle">{tour.subtitle}</p>
-                <p class="card__desc">{tour.description}</p>
-                <div class="card__meta">
-                  <span class="card__meta-item">
-                    <span class="icon icon--xs" set:html={iconSvg('clock')} />
-                    {tour.duration}
-                  </span>
-                  {tour.maxPeople && (
-                    <span class="card__meta-item">
-                      <span class="icon icon--xs" set:html={iconSvg('users')} />
-                      {tour.maxPeople}
-                    </span>
-                  )}
-                </div>
-                {tour.extras && <p class="card__extras">{tour.extras}</p>}
-                <div class="card__footer">
-                  <span class="card__price">{tour.price}</span>
-                  <div class="card__actions">
-                    <button type="button" class="btn btn--small btn--ghost" data-modal-open data-tour-id={tour.id}>Read more</button>
-                    <button type="button" class="btn btn--small btn--primary" data-quick-book data-tour-title={tour.title}>WhatsApp</button>
-                  </div>
-                </div>
-              </div>
-            </article>
-          );
-        })}
-      </div>
+            </div>
+            <div class="tour-feature__long" set:html={mdToHtmlServer(enTour.longDescription || enTour.description)} />
+            {enTour.extras && <p class="tour-feature__extras">{enTour.extras}</p>}
+            <div class="tour-feature__cta">
+              <span class="tour-feature__price">{enTour.price}</span>
+              <a
+                href={`https://wa.me/${contacts.whatsappNumber}?text=${encodeURIComponent(`Hi Masha! I'd like to book: ${enTour.title}`)}`}
+                target="_blank" rel="noopener"
+                class="btn btn--cta btn--lg"
+              >
+                <span>Book in WhatsApp</span>
+                <svg class="btn--cta__arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 5 7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
+        </article>
+      )}
     </div>
   </section>
 
@@ -1215,74 +1219,32 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
     .btn--lg { font-size: 1rem; padding: 1em 2.2em; }
     .btn--full { width: 100%; }
 
-    /* ===== CTA button: animated terracotta gradient with shine ===== */
+    /* ===== CTA button: terracotta, quiet ===== */
     .btn--cta {
       position: relative;
-      overflow: hidden;
-      isolation: isolate;
       color: #fff;
       border: none;
       padding: 1.05em 2.6em;
       font-weight: 600;
       letter-spacing: 0.03em;
-      background: linear-gradient(135deg, #c4622d 0%, #d9794a 45%, #d9a441 100%);
-      background-size: 220% 220%;
+      background: linear-gradient(135deg, #c4622d 0%, #d9794a 100%);
       box-shadow:
-        0 10px 28px -8px rgba(196, 98, 45, 0.65),
-        0 2px 8px -2px rgba(30, 24, 18, 0.35),
+        0 10px 28px -10px rgba(196, 98, 45, 0.55),
+        0 2px 8px -2px rgba(30, 24, 18, 0.32),
         inset 0 1px 0 rgba(255, 255, 255, 0.18);
-      animation: ctaGradient 7s ease-in-out infinite, ctaPulse 2.8s ease-in-out infinite;
+      transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
     }
-    .btn--cta::before {
-      content: '';
-      position: absolute;
-      top: 0; bottom: 0;
-      left: -60%; width: 45%;
-      background: linear-gradient(110deg, transparent 0%, rgba(255, 255, 255, 0.45) 50%, transparent 100%);
-      transform: skewX(-18deg);
-      animation: ctaShine 4.2s ease-in-out 1.2s infinite;
-      z-index: -1;
-    }
-    .btn--cta > span { position: relative; z-index: 1; }
-    .btn--cta__arrow { position: relative; z-index: 1; transition: transform 0.35s var(--ease); }
+    .btn--cta__arrow { transition: transform 0.35s var(--ease); }
     .btn--cta:hover {
-      transform: translateY(-2px) scale(1.025);
+      transform: translateY(-2px);
       box-shadow:
-        0 14px 36px -6px rgba(217, 121, 74, 0.75),
-        0 4px 12px -2px rgba(30, 24, 18, 0.35),
-        inset 0 1px 0 rgba(255, 255, 255, 0.28);
-      animation-play-state: paused;
+        0 16px 36px -10px rgba(217, 121, 74, 0.65),
+        0 4px 12px -2px rgba(30, 24, 18, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.26);
     }
     .btn--cta:hover .btn--cta__arrow { transform: translateX(5px); }
-    .btn--cta:active { transform: translateY(0) scale(0.99); }
+    .btn--cta:active { transform: translateY(0); }
     .btn--cta:focus-visible { outline: 2px solid var(--cream); outline-offset: 3px; }
-
-    @keyframes ctaGradient {
-      0%, 100% { background-position: 0% 50%; }
-      50%      { background-position: 100% 50%; }
-    }
-    @keyframes ctaPulse {
-      0%, 100% {
-        box-shadow:
-          0 10px 28px -8px rgba(196, 98, 45, 0.65),
-          0 2px 8px -2px rgba(30, 24, 18, 0.35),
-          inset 0 1px 0 rgba(255, 255, 255, 0.18);
-      }
-      50% {
-        box-shadow:
-          0 12px 34px -6px rgba(217, 121, 74, 0.85),
-          0 2px 8px -2px rgba(30, 24, 18, 0.35),
-          inset 0 1px 0 rgba(255, 255, 255, 0.25);
-      }
-    }
-    @keyframes ctaShine {
-      0%        { left: -60%; }
-      55%, 100% { left: 130%; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .btn--cta,
-      .btn--cta::before { animation: none; }
-    }
 
     /* ============ NAVIGATION ============ */
     .nav {
@@ -1488,6 +1450,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       background-size: cover;
       background-position: center;
       z-index: 0;
+      filter: saturate(1.06) contrast(1.03);
       animation: heroBgZoom 18s ease-in-out infinite alternate;
     }
     @keyframes heroBgZoom {
@@ -1513,21 +1476,30 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       to   { opacity: 1; transform: translateY(0); }
     }
     .hero__over {
-      display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
-      margin-bottom: 1.5rem;
-      font-size: clamp(0.7rem, 0.62rem + 0.4vw, 0.85rem);
+      display: inline-flex; align-items: center; flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-bottom: 1.75rem;
+      font-size: clamp(0.7rem, 0.62rem + 0.35vw, 0.82rem);
       letter-spacing: 0.22em;
       text-transform: uppercase;
       font-weight: 500;
+      opacity: 0.9;
     }
-    .hero__over span:last-child {
-      letter-spacing: 0.12em;
-      text-transform: none;
-      
-      font-family: var(--font-display);
-      font-size: clamp(0.95rem, 0.8rem + 0.6vw, 1.15rem);
+    .hero__over-rule {
+      display: inline-block;
+      width: 28px; height: 1px;
+      background: currentColor;
+      opacity: 0.55;
+      flex-shrink: 0;
+    }
+    .hero__over-sep {
+      opacity: 0.45;
+      letter-spacing: 0;
+    }
+    .hero__over-sub {
+      letter-spacing: 0.18em;
+      opacity: 0.78;
       font-weight: 400;
-      opacity: 0.92;
     }
     .hero__title {
       font-family: var(--font-display);
@@ -1536,52 +1508,64 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       line-height: 0.95;
       letter-spacing: -0.015em;
       margin: 0 0 1.5rem;
-      text-shadow: 0 4px 40px rgba(0,0,0,0.25);
     }
     .hero__geo {
       display: inline-flex; flex-wrap: wrap; justify-content: center;
-      gap: 0.5rem 0.75rem;
-      font-size: clamp(0.85rem, 0.75rem + 0.4vw, 1rem);
-      letter-spacing: 0.08em;
-      margin-bottom: 1rem;
-      opacity: 0.88;
+      gap: 0.35rem 0.7rem;
+      font-size: clamp(0.76rem, 0.7rem + 0.25vw, 0.88rem);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+      opacity: 0.75;
     }
-    .hero__geo-sep { opacity: 0.5; }
+    .hero__geo-sep { opacity: 0.4; font-weight: 300; }
     .hero__tagline {
       font-family: var(--font-display);
-      font-size: clamp(1.1rem, 0.9rem + 0.8vw, 1.4rem);
-      
+      font-style: italic;
+      font-size: clamp(1.15rem, 0.95rem + 0.8vw, 1.45rem);
       font-weight: 400;
       max-width: 560px;
       margin: 0 auto 2.5rem;
-      line-height: 1.4;
+      line-height: 1.45;
       opacity: 0.95;
     }
     .hero__actions {
-      display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
-      margin-bottom: 3rem;
+      display: flex; gap: 1.25rem 1.75rem; justify-content: center; align-items: center; flex-wrap: wrap;
+      margin-bottom: 2.5rem;
     }
+    .hero__whatsapp {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 3px;
+      transition: color 0.25s var(--ease), border-color 0.25s var(--ease);
+    }
+    .hero__whatsapp::after {
+      content: '→';
+      font-size: 1rem;
+      transition: transform 0.3s var(--ease);
+    }
+    .hero__whatsapp:hover { color: #fff; border-color: rgba(255, 255, 255, 0.7); }
+    .hero__whatsapp:hover::after { transform: translateX(3px); }
     .hero__license {
-      display: inline-flex; align-items: center; gap: 0.85rem;
-      padding: 0.6rem 1rem 0.6rem 0.6rem;
-      border-radius: 999px;
-      background: rgba(0,0,0,0.32);
-      border: 1px solid rgba(255,255,255,0.18);
-      color: rgba(255,255,255,0.9);
-      font-size: 0.78rem;
-      letter-spacing: 0.04em;
-      transition: all 0.25s;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
+      transition: color 0.25s var(--ease);
     }
-    .hero__license:hover { background: rgba(0,0,0,0.45); }
-    .hero__license-qr {
-      width: 44px; height: 44px;
-      background: #fff;
-      padding: 4px;
-      border-radius: 8px;
+    .hero__license:hover { color: rgba(255, 255, 255, 0.9); }
+    .hero__license-icon { opacity: 0.7; flex-shrink: 0; }
+    .hero__license-arrow {
+      font-size: 0.85rem;
+      letter-spacing: 0;
+      opacity: 0.7;
+      transform: translateY(-1px);
     }
-    .hero__license-text { display: flex; flex-direction: column; line-height: 1.3; text-align: left; }
-    .hero__license-label { font-weight: 500; color: #fff; }
-    .hero__license-url { opacity: 0.7; font-size: 0.72rem; }
 
     .hero__scroll {
       position: absolute;
@@ -1606,12 +1590,12 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       .hero { justify-content: flex-end; }
       .hero__overlay {
         background:
-          linear-gradient(95deg,
+          radial-gradient(ellipse 55% 65% at 78% 55%, rgba(0, 0, 0, 0.22) 0%, transparent 70%),
+          linear-gradient(100deg,
             rgba(13, 74, 94, 0) 0%,
-            rgba(13, 74, 94, 0) 35%,
-            rgba(13, 74, 94, 0.55) 48%,
-            rgba(13, 74, 94, 0.85) 62%,
-            rgba(30, 24, 18, 0.92) 100%);
+            rgba(30, 24, 18, 0) 38%,
+            rgba(30, 24, 18, 0.42) 66%,
+            rgba(20, 14, 10, 0.82) 100%);
       }
       .hero__content {
         text-align: left;
@@ -1620,7 +1604,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
         max-width: min(58%, 720px);
         padding: calc(var(--nav-h) + 3rem) 0 5rem;
       }
-      .hero__over { align-items: flex-start; }
+      .hero__over { justify-content: flex-start; }
       .hero__geo { justify-content: flex-start; }
       .hero__tagline { margin: 0 0 2.5rem; }
       .hero__actions { justify-content: flex-start; }
@@ -2183,6 +2167,111 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       color: var(--ink);
     }
     .card__actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+    /* ============ TOUR FEATURE (EN — single expanded tour) ============ */
+    .tour-feature {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) 1.3fr;
+      gap: clamp(2rem, 5vw, 4rem);
+      align-items: start;
+      background: var(--cream);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: clamp(1.5rem, 3vw, 2.5rem);
+      box-shadow: var(--shadow-sm);
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+    .tour-feature__media {
+      position: relative;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      aspect-ratio: 4/5;
+      background: var(--paper);
+    }
+    .tour-feature__media img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s var(--ease);
+    }
+    .tour-feature:hover .tour-feature__media img { transform: scale(1.02); }
+    .tour-feature__body { display: flex; flex-direction: column; }
+    .tour-feature__title {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.5rem);
+      font-weight: 500;
+      line-height: 1.1;
+      color: var(--ink);
+      margin: 0 0 0.4rem;
+    }
+    .tour-feature__subtitle {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.2rem);
+      color: var(--text-mute);
+      margin: 0 0 1.25rem;
+      line-height: 1.4;
+    }
+    .tour-feature__meta {
+      display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.9rem;
+      color: var(--text-mute);
+    }
+    .tour-feature__meta-item { display: inline-flex; align-items: center; gap: 0.4rem; }
+    .tour-feature__long {
+      font-size: 1rem;
+      line-height: 1.65;
+      color: var(--text);
+    }
+    .tour-feature__long p { margin-bottom: 0.85rem; }
+    .tour-feature__long p:last-child { margin-bottom: 0; }
+    .tour-feature__long ul { list-style: none; padding-left: 0; margin: 0.5rem 0 1rem; }
+    .tour-feature__long li {
+      position: relative;
+      padding-left: 1.3rem;
+      margin-bottom: 0.45rem;
+    }
+    .tour-feature__long li::before {
+      content: '';
+      position: absolute;
+      left: 0.1rem; top: 0.65rem;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--terracotta);
+    }
+    .tour-feature__long strong { color: var(--ink); font-weight: 600; }
+    .tour-feature__long em { font-style: italic; color: var(--text-mute); }
+    .tour-feature__extras {
+      margin-top: 0.5rem;
+      padding: 0.75rem 1rem;
+      border-left: 3px solid var(--lemon);
+      background: rgba(217, 164, 65, 0.08);
+      font-size: 0.9rem;
+      color: var(--text-mute);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+    .tour-feature__cta {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 1rem 1.5rem;
+      margin-top: 1.75rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--line);
+    }
+    .tour-feature__price {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 1.2rem + 0.6vw, 1.85rem);
+      font-weight: 600;
+      color: var(--ink);
+    }
+    @media (max-width: 800px) {
+      .tour-feature { grid-template-columns: 1fr; }
+      .tour-feature__media { aspect-ratio: 4/3; }
+      .tour-feature__cta { justify-content: center; }
+      .tour-feature__cta .btn { width: 100%; justify-content: center; }
+    }
 
     /* ============ COUCH ============ */
     .couch {

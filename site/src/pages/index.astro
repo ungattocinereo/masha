@@ -239,9 +239,6 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
   <!-- ============ HERO ============ -->
   <section class="hero" id="top">
     <div class="hero__bg" role="img" aria-label="Amalfi coast"></div>
-    <div class="hero__portrait" aria-hidden="true">
-      <img src="/images/masha.jpg" alt="" loading="eager" fetchpriority="high" />
-    </div>
     <div class="hero__overlay"></div>
 
     <div class="hero__content">
@@ -1504,14 +1501,6 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
         radial-gradient(ellipse at 50% 55%, rgba(0, 0, 0, 0.35) 0%, transparent 70%);
     }
 
-    /* Masha portrait: hidden by default, revealed on desktop (≥901px) */
-    .hero__portrait { display: none; }
-    .hero__portrait img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      object-position: center 20%;
-      display: block;
-    }
     .hero__content {
       position: relative; z-index: 2;
       text-align: center;
@@ -1612,26 +1601,9 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       .hero__scroll { animation: none; }
     }
 
-    /* ============ HERO DESKTOP (two-column: portrait left + content right) ============ */
+    /* ============ HERO DESKTOP (bg split by gradient: Masha left, content right) ============ */
     @media (min-width: 901px) {
       .hero { justify-content: flex-end; }
-      .hero__portrait {
-        display: block;
-        position: absolute;
-        left: 0; top: 0; bottom: 0;
-        width: clamp(380px, 42vw, 640px);
-        z-index: 2;
-        overflow: hidden;
-        animation: heroPortraitIn 1.4s var(--ease) both;
-      }
-      .hero__portrait::after {
-        content: '';
-        position: absolute;
-        top: 0; bottom: 0; right: 0;
-        width: 28%;
-        background: linear-gradient(to right, transparent 0%, rgba(13, 74, 94, 0.35) 50%, rgba(30, 24, 18, 0.75) 100%);
-        pointer-events: none;
-      }
       .hero__overlay {
         background:
           linear-gradient(95deg,
@@ -1653,10 +1625,6 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       .hero__tagline { margin: 0 0 2.5rem; }
       .hero__actions { justify-content: flex-start; }
       .hero__license { align-self: flex-start; }
-    }
-    @keyframes heroPortraitIn {
-      from { opacity: 0; transform: translateX(-24px); }
-      to   { opacity: 1; transform: translateX(0); }
     }
 
     /* ============ HERO MOBILE (two-part: image top + text bottom) ============ */

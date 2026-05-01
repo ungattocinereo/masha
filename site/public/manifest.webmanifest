@@ -1,0 +1,30 @@
+{
+  "name": "Маша Шишкова — гид по Кампании",
+  "short_name": "Маша · Гид",
+  "description": "Лицензированный гид по Неаполю, Помпеям и Амальфитанскому побережью. Авторские экскурсии, квесты, дегустации.",
+  "lang": "ru",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fbf7ee",
+  "theme_color": "#1a6b8a",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-32.png",
+      "type": "image/png",
+      "sizes": "32x32"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "180x180",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,184 @@
+---
+/**
+ * Destination hub page (Russian).
+ * One URL per destination: /naples, /pompeii, /amalfi, /ravello, /capri, /paestum, /herculaneum
+ */
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import FAQ from '../components/FAQ.astro';
+import TourCard from '../components/TourCard.astro';
+import ReviewsList from '../components/ReviewsList.astro';
+import { destinations, type Destination } from '../data/destinations';
+import { tours, contacts } from '../data/tours';
+import { mdToHtml } from '../lib/markdown';
+import { iconSvg } from '../lib/icons';
+
+export async function getStaticPaths() {
+  return destinations.map(d => ({
+    params: { destination: d.slug },
+    props: { destination: d },
+  }));
+}
+
+interface Props { destination: Destination; }
+const { destination } = Astro.props as Props;
+
+const canonical = `https://masha.amalfi.day/${destination.slug}`;
+
+// Resolve tours for this destination
+const matchedByCategory = tours.filter(t =>
+  t.lang !== 'en' &&
+  destination.tourCategoryIds.some(catId =>
+    t.category === catId || (t.extraCategories?.includes(catId) ?? false)
+  )
+);
+const matchedExtra = tours.filter(t =>
+  t.lang !== 'en' &&
+  destination.extraTourIds?.includes(t.id) &&
+  !matchedByCategory.find(m => m.id === t.id)
+);
+const destTours = [...matchedByCategory, ...matchedExtra];
+
+// Breadcrumbs
+const crumbs = [
+  { name: 'Главная', url: 'https://masha.amalfi.day/' },
+  { name: destination.longName, url: canonical },
+];
+
+// JSON-LD: TouristDestination + ItemList of Tours + FAQPage
+const placeSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'TouristDestination',
+  '@id': `${canonical}#destination`,
+  name: destination.longName,
+  description: destination.metaDescription,
+  url: canonical,
+  image: `https://masha.amalfi.day${destination.heroImage}`,
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: destination.geo.lat,
+    longitude: destination.geo.lng,
+  },
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: destination.address.locality,
+    addressRegion: destination.address.region || 'Campania',
+    addressCountry: destination.address.country || 'IT',
+  },
+  touristType: ['Cultural', 'Food', 'Family'],
+  includesAttraction: destTours.slice(0, 8).map(t => ({
+    '@type': 'TouristAttraction',
+    name: t.title,
+    url: `https://masha.amalfi.day/tours/${t.slug || t.id}`,
+  })),
+};
+
+const itemListSchema = destTours.length > 0 ? {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: `Экскурсии в ${destination.longName} с гидом`,
+  itemListElement: destTours.map((t, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    url: t.externalUrl || `https://masha.amalfi.day/tours/${t.slug || t.id}`,
+    name: t.title,
+  })),
+} : null;
+---
+<Layout
+  title={destination.seoTitle || `Экскурсии в ${destination.longName} с гидом · Маша Шишкова`}
+  description={destination.metaDescription}
+  canonical={canonical}
+  ogImage={`https://masha.amalfi.day${destination.heroImage}`}
+  ogImageAlt={destination.heroImageAlt}
+  lang="ru"
+  alternates={[
+    { hreflang: 'ru', href: canonical },
+    { hreflang: 'x-default', href: canonical },
+  ]}
+  keywords={destination.keywords}
+  jsonLd={[placeSchema, ...(itemListSchema ? [itemListSchema] : [])]}
+  preloads={[{ as: 'image', href: destination.heroImage, fetchpriority: 'high' }]}
+>
+  <article class="dest">
+    <div class="container">
+      <Breadcrumbs items={crumbs} />
+
+      <header class="dest__head">
+        <p class="kicker">{destination.kicker}</p>
+        <h1 class="dest__title">{destination.longName}</h1>
+      </header>
+
+      <figure class="dest__hero">
+        <img src={destination.heroImage} alt={destination.heroImageAlt} width="1600" height="900" fetchpriority="high" />
+      </figure>
+
+      <div class="dest__body" set:html={mdToHtml(destination.body)} />
+
+      {destTours.length > 0 && (
+        <section class="dest__tours">
+          <h2 class="section-title section-title--center">Экскурсии в {destination.longName}</h2>
+          <div class="dest__tours-grid">
+            {destTours.map(t => <TourCard tour={t} lang="ru" />)}
+          </div>
+        </section>
+      )}
+
+      <FAQ items={destination.faq} title={`Частые вопросы о ${destination.longName}`} />
+
+      <ReviewsList heading="Отзывы" limit={3} />
+
+      <section class="dest__cta">
+        <h2 class="section-title section-title--center">Запись и вопросы</h2>
+        <p class="dest__cta-lead">
+          Расскажите, какие даты вы рассматриваете и что интересует — отвечу в течение нескольких часов и помогу выстроить логистику.
+        </p>
+        <div class="dest__cta-actions">
+          <a class="btn btn--primary btn--lg" href={`https://wa.me/${contacts.whatsappNumber}?text=${encodeURIComponent(`Здравствуйте, Маша! Интересуют экскурсии в ${destination.longName}.`)}`} target="_blank" rel="noopener">
+            <span class="dest__cta-icon" set:html={iconSvg('message-circle')} />
+            <span>Написать в WhatsApp</span>
+          </a>
+          <a class="btn btn--ghost btn--lg" href={contacts.telegram} target="_blank" rel="noopener">
+            <span class="dest__cta-icon" set:html={iconSvg('send')} />
+            <span>Telegram</span>
+          </a>
+        </div>
+      </section>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .dest { padding: 0 0 4rem; }
+  .dest__head { margin-bottom: 1rem; }
+  .dest__title { font-family: var(--serif); font-size: clamp(2.2rem, 1.6rem + 2.5vw, 3.6rem); margin: 0; line-height: 1.05; }
+  .dest__hero { margin: 1.5rem 0 2.5rem; border-radius: 1rem; overflow: hidden; aspect-ratio: 16/9; }
+  .dest__hero img { width: 100%; height: 100%; object-fit: cover; }
+  .dest__body { font-family: var(--serif); font-size: 1.15rem; line-height: 1.7; max-width: 760px; margin: 0 auto; }
+  .dest__body p { margin: 0 0 1.1rem; }
+  .dest__body ul { padding-left: 1.5rem; margin: 0 0 1.1rem; }
+  .dest__body li { margin-bottom: 0.45rem; }
+  .dest__body strong { color: var(--terra); }
+
+  .dest__tours { margin: 4rem 0 3rem; }
+  .dest__tours-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .dest__cta {
+    background: linear-gradient(135deg, var(--azure-deep), var(--azure));
+    color: #fff;
+    border-radius: 1.25rem;
+    padding: 2.5rem clamp(1.5rem, 4vw, 3rem);
+    margin: 3rem 0 1rem;
+    text-align: center;
+  }
+  .dest__cta .section-title { color: #fff; }
+  .dest__cta-lead { max-width: 540px; margin: 0 auto 1.5rem; opacity: 0.92; }
+  .dest__cta-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+  .dest__cta-actions .btn--ghost { color: #fff; border-color: rgba(255,255,255,0.5); }
+  .dest__cta-actions .btn--ghost:hover { background: rgba(255,255,255,0.15); color: #fff; }
+  .dest__cta-icon svg { width: 18px; height: 18px; }
+</style>

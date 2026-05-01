@@ -1,0 +1,204 @@
+---
+/**
+ * Per-tour landing page (English).
+ * Generates one URL per lang:'en' tour: /en/tours/<slug>
+ */
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import FAQ from '../../../components/FAQ.astro';
+import { tours, contacts, about, type Tour } from '../../../data/tours';
+import { mdToHtml } from '../../../lib/markdown';
+import { iconSvg } from '../../../lib/icons';
+
+export async function getStaticPaths() {
+  return tours
+    .filter(t => t.lang === 'en')
+    .map(tour => ({
+      params: { id: tour.slug || tour.id.replace(/-en$/, '') },
+      props: { tour },
+    }));
+}
+
+interface Props { tour: Tour; }
+const { tour } = Astro.props as Props;
+
+const slug = tour.slug || tour.id.replace(/-en$/, '');
+const canonical = `https://masha.amalfi.day/en/tours/${slug}`;
+const ruCanonical = `https://masha.amalfi.day/tours/${slug}`;
+
+const seoTitle = tour.seoTitle ||
+  `${tour.title} — ${tour.duration}, ${tour.price} · private tour with Masha Shishkova`;
+const seoDescription = tour.seoDescription || tour.description;
+
+const defaultFaqs = [
+  { q: 'Do I need to pay a deposit?', a: 'No. Payment on the day, after the tour, in cash or by transfer.' },
+  { q: "What's included in the price?", a: 'The work of a licensed Regione Campania guide. Entrance tickets, transport and food are paid separately (when applicable).' },
+  { q: 'Which languages are available?', a: 'English, Russian, Italian. I am a licensed guide of Regione Campania — languages are certified.' },
+  { q: 'How do I book?', a: 'WhatsApp +7 921 959-49-78 is fastest. Reply within a few hours.' },
+];
+const faqs = tour.faq || defaultFaqs;
+
+const crumbs = [
+  { name: 'Home', url: 'https://masha.amalfi.day/en/' },
+  { name: tour.title, url: canonical },
+];
+
+const serviceSchema: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  '@id': `${canonical}#service`,
+  name: tour.title,
+  description: tour.description,
+  serviceType: 'Tourist guide service',
+  url: canonical,
+  image: `https://masha.amalfi.day${tour.image}`,
+  provider: {
+    '@type': 'Person',
+    name: 'Masha Shishkova',
+    jobTitle: 'Licensed guide',
+    image: 'https://masha.amalfi.day/images/masha.jpg',
+    telephone: '+79219594978',
+    email: contacts.email,
+    knowsLanguage: ['en', 'ru', 'it'],
+    hasCredential: {
+      '@type': 'EducationalOccupationalCredential',
+      credentialCategory: 'license',
+      name: 'Licenza guida turistica Regione Campania',
+      url: about.licenseUrl,
+    },
+  },
+  areaServed: { '@type': 'AdministrativeArea', name: 'Campania, Italy' },
+  inLanguage: ['en', 'ru', 'it'],
+  ...(tour.priceEUR && tour.priceEUR > 0 ? {
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'EUR',
+      price: String(tour.priceEUR),
+      url: canonical,
+      availability: 'https://schema.org/InStock',
+    },
+  } : {}),
+};
+
+const keywords = (tour.keywords || []).join(', ');
+const whatsappLink = `https://wa.me/${contacts.whatsappNumber}?text=${encodeURIComponent(`Hi Masha! I'd like to book: ${tour.title}.`)}`;
+---
+<Layout
+  title={seoTitle}
+  description={seoDescription}
+  canonical={canonical}
+  ogImage={`https://masha.amalfi.day${tour.image}`}
+  ogImageAlt={tour.imageAlt || tour.title}
+  lang="en"
+  alternates={[
+    { hreflang: 'en', href: canonical },
+    { hreflang: 'ru', href: ruCanonical },
+    { hreflang: 'x-default', href: ruCanonical },
+  ]}
+  keywords={keywords}
+  jsonLd={[serviceSchema]}
+  preloads={[{ as: 'image', href: tour.image, fetchpriority: 'high' }]}
+>
+  <article class="tour">
+    <div class="container">
+      <Breadcrumbs items={crumbs} />
+
+      <header class="tour__head">
+        <p class="kicker">Private tour</p>
+        <h1 class="tour__title">{tour.title}</h1>
+        <p class="tour__subtitle">{tour.subtitle}</p>
+        <div class="tour__meta">
+          <span><span class="tour__meta-icon" set:html={iconSvg('clock')} /> {tour.duration}</span>
+          {tour.maxPeople && <span><span class="tour__meta-icon" set:html={iconSvg('users')} /> {tour.maxPeople}</span>}
+          <span><span class="tour__meta-icon" set:html={iconSvg('map-pin')} /> Campania, Italy</span>
+        </div>
+      </header>
+
+      <figure class="tour__hero">
+        <img src={tour.image} alt={tour.imageAlt || tour.title} width="1200" height="800" fetchpriority="high" />
+      </figure>
+
+      <div class="tour__layout">
+        <div class="tour__main">
+          {tour.longDescription && <div class="tour__long" set:html={mdToHtml(tour.longDescription)} />}
+          {tour.extras && <aside class="tour__extras"><strong>Note:</strong> {tour.extras}</aside>}
+          <FAQ items={faqs} title="FAQ about this tour" />
+        </div>
+
+        <aside class="tour__sidebar">
+          <div class="tour__price-card">
+            <p class="tour__price-label">Price</p>
+            <p class="tour__price">{tour.price}</p>
+            <p class="tour__price-note">No deposit · Pay on arrival</p>
+            <a class="btn btn--primary btn--lg btn--full" href={whatsappLink} target="_blank" rel="noopener">
+              <span class="tour__btn-icon" set:html={iconSvg('message-circle')} />
+              <span>Book on WhatsApp</span>
+            </a>
+            <a class="btn btn--ghost btn--full" href={contacts.telegram} target="_blank" rel="noopener" style="margin-top: 0.5rem;">
+              <span class="tour__btn-icon" set:html={iconSvg('send')} />
+              <span>Telegram</span>
+            </a>
+            <ul class="tour__perks">
+              <li><span class="tour__perks-icon" set:html={iconSvg('check')} /> Licensed Regione Campania guide</li>
+              <li><span class="tour__perks-icon" set:html={iconSvg('check')} /> Tour adapts to your pace</li>
+              <li><span class="tour__perks-icon" set:html={iconSvg('check')} /> English, Russian, Italian</li>
+              <li><span class="tour__perks-icon" set:html={iconSvg('check')} /> Reply within hours</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .tour { padding: 0 0 4rem; }
+  .tour__head { margin-bottom: 1.5rem; }
+  .tour__title { font-family: var(--serif); font-size: clamp(2rem, 1.5rem + 2vw, 3.2rem); margin: 0.25rem 0 0.5rem; line-height: 1.1; color: var(--ink); }
+  .tour__subtitle { font-family: var(--serif); font-style: italic; font-size: 1.2rem; color: var(--ink-soft); margin: 0 0 1.25rem; }
+  .tour__meta { display: flex; flex-wrap: wrap; gap: 1.25rem; font-size: 0.95rem; color: var(--ink-soft); margin-bottom: 1.5rem; }
+  .tour__meta span { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .tour__meta-icon svg { width: 16px; height: 16px; }
+
+  .tour__hero { margin: 0 0 2rem; border-radius: 1rem; overflow: hidden; aspect-ratio: 16/9; }
+  .tour__hero img { width: 100%; height: 100%; object-fit: cover; }
+
+  .tour__layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 3rem; align-items: start;
+  }
+  @media (max-width: 880px) {
+    .tour__layout { grid-template-columns: 1fr; gap: 2rem; }
+  }
+
+  .tour__long { font-family: var(--serif); font-size: 1.15rem; line-height: 1.65; color: var(--ink); }
+  .tour__long p { margin: 0 0 1rem; }
+  .tour__long ul { padding-left: 1.5rem; margin: 0 0 1rem; }
+  .tour__long li { margin-bottom: 0.4rem; }
+  .tour__long strong { color: var(--terra); }
+
+  .tour__extras {
+    margin: 1.5rem 0; padding: 1rem 1.25rem;
+    background: rgba(217, 164, 65, 0.08);
+    border-left: 3px solid var(--lemon); border-radius: 0.4rem;
+    font-size: 0.95rem;
+  }
+
+  .tour__sidebar { position: sticky; top: 5rem; }
+  @media (max-width: 880px) { .tour__sidebar { position: static; } }
+
+  .tour__price-card {
+    background: #fff; border: 1px solid var(--line); border-radius: 1rem;
+    padding: 1.5rem; box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+  }
+  .tour__price-label { font-size: 0.85rem; color: var(--ink-soft); margin: 0 0 0.25rem; }
+  .tour__price { font-family: var(--serif); font-size: 2rem; font-weight: 600; color: var(--terra); margin: 0 0 0.25rem; }
+  .tour__price-note { font-size: 0.85rem; color: var(--ink-soft); margin: 0 0 1.25rem; }
+  .tour__perks { list-style: none; padding: 1.25rem 0 0; margin: 1.25rem 0 0; border-top: 1px solid var(--line); font-size: 0.9rem; color: var(--ink-soft); display: flex; flex-direction: column; gap: 0.4rem; }
+  .tour__perks li { display: flex; align-items: flex-start; gap: 0.55rem; }
+  .tour__perks-icon { display: inline-flex; flex-shrink: 0; width: 14px; height: 14px; color: var(--olive); margin-top: 0.25em; }
+  .tour__perks-icon svg { width: 100%; height: 100%; }
+  .tour__btn-icon { display: inline-flex; }
+  .tour__btn-icon svg { width: 18px; height: 18px; }
+</style>

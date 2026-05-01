@@ -1,0 +1,117 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const canonical = 'https://masha.amalfi.day/blog';
+
+const blogSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Blog',
+  '@id': `${canonical}#blog`,
+  name: 'Записки гида · Маша Шишкова',
+  description: 'Гид по Кампании: маршруты, советы, истории про Неаполь, Помпеи, Амальфи, Капри.',
+  url: canonical,
+  author: { '@type': 'Person', name: 'Маша Шишкова' },
+  blogPost: posts.map(p => ({
+    '@type': 'BlogPosting',
+    headline: p.data.title,
+    description: p.data.description,
+    url: `https://masha.amalfi.day/blog/${p.slug}`,
+    datePublished: p.data.pubDate.toISOString(),
+    image: p.data.image ? `https://masha.amalfi.day${p.data.image}` : undefined,
+  })),
+};
+
+const formatDate = (d: Date) => {
+  const months = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+};
+---
+<Layout
+  title="Блог · Маша Шишкова — гид по Кампании"
+  description="Записки гида: маршруты, советы и истории про Неаполь, Помпеи, Амальфитанское побережье, Капри. От лицензированного гида в Майори."
+  canonical={canonical}
+  lang="ru"
+  alternates={[
+    { hreflang: 'ru', href: canonical },
+    { hreflang: 'x-default', href: canonical },
+  ]}
+  jsonLd={[blogSchema]}
+>
+  <article class="blog-index">
+    <div class="container">
+      <Breadcrumbs items={[
+        { name: 'Главная', url: 'https://masha.amalfi.day/' },
+        { name: 'Блог', url: canonical },
+      ]} />
+
+      <header class="blog-index__head">
+        <p class="kicker">Записки гида</p>
+        <h1>Блог</h1>
+        <p>Маршруты, советы, истории про Неаполь, Помпеи, Амальфитанское побережье, Капри. Из первых рук.</p>
+      </header>
+
+      <div class="blog-index__grid">
+        {posts.map(p => (
+          <a class="blog-card" href={`/blog/${p.slug}`}>
+            {p.data.image && (
+              <div class="blog-card__media">
+                <img src={p.data.image} alt={p.data.imageAlt || p.data.title} loading="lazy" width="800" height="500" />
+              </div>
+            )}
+            <div class="blog-card__body">
+              <time class="blog-card__date">{formatDate(p.data.pubDate)}</time>
+              <h2 class="blog-card__title">{p.data.title}</h2>
+              <p class="blog-card__desc">{p.data.description}</p>
+              {p.data.tags.length > 0 && (
+                <div class="blog-card__tags">
+                  {p.data.tags.slice(0, 3).map(t => <span>{t}</span>)}
+                </div>
+              )}
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .blog-index { padding: 0 0 4rem; }
+  .blog-index__head { text-align: center; margin: 1rem 0 2.5rem; }
+  .blog-index__head h1 { font-family: var(--serif); font-size: clamp(2rem, 1.5rem + 2vw, 3rem); margin: 0.25rem 0 1rem; }
+  .blog-index__head p { max-width: 540px; margin: 0 auto; color: var(--ink-soft); font-size: 1.05rem; }
+
+  .blog-index__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .blog-card {
+    display: flex; flex-direction: column;
+    background: #fff; border: 1px solid var(--line); border-radius: 1rem;
+    overflow: hidden;
+    color: var(--ink) !important;
+    text-decoration: none;
+    transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  }
+  .blog-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+  .blog-card__media { aspect-ratio: 16/10; overflow: hidden; }
+  .blog-card__media img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s var(--ease); }
+  .blog-card:hover .blog-card__media img { transform: scale(1.04); }
+  .blog-card__body { padding: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
+  .blog-card__date { font-size: 0.8rem; color: var(--ink-soft); }
+  .blog-card__title { font-family: var(--serif); font-size: 1.3rem; line-height: 1.2; margin: 0; }
+  .blog-card__desc { margin: 0; color: var(--ink-soft); font-size: 0.95rem; flex: 1; }
+  .blog-card__tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+  .blog-card__tags span {
+    font-size: 0.75rem; color: var(--terra);
+    background: rgba(196, 98, 45, 0.08);
+    padding: 0.25rem 0.5rem; border-radius: 999px;
+  }
+</style>

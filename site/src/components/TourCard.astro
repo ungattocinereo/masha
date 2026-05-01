@@ -1,0 +1,94 @@
+---
+/** Tour card linking to the tour's dedicated page (or external URL if set).
+ *  Used on destination hubs and the /tours/ index. */
+import type { Tour } from '../data/tours';
+import { categories } from '../data/tours';
+import { iconSvg } from '../lib/icons';
+import { colorForCategory } from '../lib/gradients';
+
+interface Props {
+  tour: Tour;
+  /** Translate links to /en/ for the EN site. */
+  lang?: 'ru' | 'en';
+}
+const { tour, lang = 'ru' } = Astro.props;
+const cat = categories.find(c => c.id === tour.category);
+const catColor = colorForCategory(tour.category);
+const slug = tour.slug || tour.id;
+const href = tour.externalUrl || (lang === 'en' ? `/en/tours/${slug}` : `/tours/${slug}`);
+const isExternal = !!tour.externalUrl;
+---
+<article class="tc">
+  <a class="tc__media" href={href} {...(isExternal ? { target: '_blank', rel: 'noopener' } : {})}>
+    <img src={tour.image} alt={tour.imageAlt || tour.title} loading="lazy" width="800" height="500" decoding="async" />
+    <span class="tc__cat">
+      <span class={`tc__cat-icon tc__cat-icon--${catColor}`} set:html={iconSvg(cat?.icon || 'sparkles')} />
+      <span>{cat?.name}</span>
+    </span>
+  </a>
+  <div class="tc__body">
+    <h3 class="tc__title">
+      <a href={href} {...(isExternal ? { target: '_blank', rel: 'noopener' } : {})}>{tour.title}</a>
+    </h3>
+    <p class="tc__subtitle">{tour.subtitle}</p>
+    <p class="tc__desc">{tour.description}</p>
+    <div class="tc__meta">
+      <span><span class="tc__meta-icon" set:html={iconSvg('clock')} /> {tour.duration}</span>
+      {tour.maxPeople && <span><span class="tc__meta-icon" set:html={iconSvg('users')} /> {tour.maxPeople}</span>}
+    </div>
+    <div class="tc__foot">
+      <span class="tc__price">{tour.price}</span>
+      <a class="btn btn--primary" href={href} {...(isExternal ? { target: '_blank', rel: 'noopener' } : {})}>
+        {lang === 'en' ? 'Details' : 'Подробнее'} →
+      </a>
+    </div>
+  </div>
+</article>
+
+<style>
+  .tc {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
+  }
+  .tc:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.09); transform: translateY(-3px); }
+  .tc__media { position: relative; aspect-ratio: 16/10; display: block; overflow: hidden; }
+  .tc__media img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s var(--ease); }
+  .tc:hover .tc__media img { transform: scale(1.04); }
+  .tc__cat {
+    position: absolute; top: 0.75rem; left: 0.75rem;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(4px);
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.78rem; font-weight: 500; color: var(--ink);
+  }
+  .tc__cat-icon { display: inline-flex; color: var(--terra); }
+  .tc__cat-icon svg { width: 14px; height: 14px; }
+  .tc__cat-icon--terra { color: var(--terra); }
+  .tc__cat-icon--azure { color: var(--azure-deep); }
+  .tc__cat-icon--lemon { color: var(--lemon); }
+  .tc__cat-icon--olive { color: var(--olive); }
+  .tc__cat-icon--sky   { color: var(--azure-light); }
+  .tc__cat-icon--mute  { color: var(--text-mute); }
+  .tc__cat-icon--ink   { color: var(--ink); }
+  .tc__cat-icon--peach { color: var(--terra-light); }
+  .tc__body { padding: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
+  .tc__title { font-family: var(--serif); font-size: 1.3rem; margin: 0; line-height: 1.2; }
+  .tc__title a { color: var(--ink); }
+  .tc__title a:hover { color: var(--terra); }
+  .tc__subtitle { font-style: italic; color: var(--ink-soft); margin: 0; font-size: 0.95rem; }
+  .tc__desc { margin: 0.25rem 0 0.5rem; font-size: 0.95rem; color: var(--ink-soft); flex: 1; }
+  .tc__meta { display: flex; gap: 1rem; font-size: 0.85rem; color: var(--ink-soft); flex-wrap: wrap; }
+  .tc__meta span { display: inline-flex; align-items: center; gap: 0.3rem; }
+  .tc__meta-icon svg { width: 14px; height: 14px; }
+  .tc__foot {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 0.75rem; padding-top: 0.85rem; border-top: 1px solid var(--line);
+  }
+  .tc__price { font-family: var(--serif); font-size: 1.25rem; font-weight: 600; color: var(--terra); }
+</style>

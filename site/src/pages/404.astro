@@ -1,0 +1,62 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { iconSvg } from '../lib/icons';
+---
+<Layout
+  title="Страница не найдена · Маша Шишкова"
+  description="Эта страница не существует или была перемещена. Вернитесь на главную или к экскурсиям."
+  canonical="https://masha.amalfi.day/404"
+  lang="ru"
+>
+  <article class="nf">
+    <div class="container">
+      <p class="nf__num">404</p>
+      <h1>Страница не найдена</h1>
+      <p class="nf__lead">Тут пусто. Похоже, страницу переместили или её никогда не было. Не страшно — вот что точно работает:</p>
+      <div class="nf__links">
+        <a class="btn btn--primary" href="/">На главную</a>
+        <a class="btn btn--ghost" href="/#tours">Все экскурсии</a>
+        <a class="btn btn--ghost" href="/blog">Блог</a>
+        <a class="btn btn--ghost" href="/contact">Контакты</a>
+      </div>
+      <div class="nf__quick">
+        <span>Популярные направления:</span>
+        <a href="/naples">Неаполь</a>
+        <a href="/pompeii">Помпеи</a>
+        <a href="/amalfi">Амальфи</a>
+        <a href="/ravello">Равелло</a>
+        <a href="/capri">Капри</a>
+      </div>
+      <a class="nf__wa" href="https://wa.me/79219594978" target="_blank" rel="noopener">
+        <span set:html={iconSvg('message-circle')} />
+        <span>Или напишите мне в WhatsApp — отвечу за пару часов</span>
+      </a>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .nf { text-align: center; padding: 4rem 1rem; min-height: 60vh; display: grid; place-items: center; }
+  .nf .container { max-width: 580px; }
+  .nf__num {
+    font-family: var(--serif);
+    font-size: clamp(5rem, 12vw, 9rem);
+    font-weight: 600;
+    color: var(--lemon);
+    margin: 0;
+    line-height: 1;
+  }
+  .nf h1 { font-family: var(--serif); font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2.2rem); margin: 0.5rem 0 1rem; }
+  .nf__lead { color: var(--ink-soft); font-size: 1.05rem; margin: 0 0 2rem; }
+  .nf__links { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
+  .nf__quick { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; align-items: center; font-size: 0.9rem; color: var(--ink-soft); margin-bottom: 2rem; }
+  .nf__quick a { padding: 0.3rem 0.65rem; border-radius: 999px; background: rgba(196, 98, 45, 0.08); color: var(--terra); }
+  .nf__quick a:hover { background: var(--terra); color: #fff; }
+  .nf__wa {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+  .nf__wa svg { width: 16px; height: 16px; color: var(--terra); }
+  .nf__wa:hover { color: var(--terra); }
+</style>

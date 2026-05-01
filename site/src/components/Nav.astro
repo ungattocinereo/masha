@@ -1,0 +1,360 @@
+---
+/**
+ * Shared site navbar — same look as the home page nav.
+ * Used by all subpages (RU + EN) via Layout.astro.
+ *
+ * Mobile: full-screen overlay below the nav header. Each link has an icon. CTA and socials
+ * pinned at the bottom. The home page (src/pages/index.astro) keeps its own inline nav for
+ * the i18n/scroll-state JS, but mirrors this structure and class names.
+ */
+import { contacts } from '../data/tours';
+import { iconSvg } from '../lib/icons';
+
+interface Props {
+  lang?: 'ru' | 'en';
+}
+const { lang = 'ru' } = Astro.props;
+
+const home = lang === 'en' ? '/en/' : '/';
+
+const links = lang === 'en' ? [
+  { href: `/en/#tours`,    label: 'Tours',    icon: 'compass'        },
+  { href: `/en/#reviews`,  label: 'Reviews',  icon: 'star'           },
+  { href: `/en/#contact`,  label: 'Contact',  icon: 'mail'           },
+] : [
+  { href: `/#about`,       label: 'Обо мне',   icon: 'graduation-cap' },
+  { href: `/#tours`,       label: 'Экскурсии', icon: 'compass'        },
+  { href: `/#reviews`,     label: 'Отзывы',    icon: 'star'           },
+  { href: `/#couch`,       label: 'На диване', icon: 'play-circle'    },
+  { href: `/#contact`,     label: 'Контакты',  icon: 'mail'           },
+];
+
+const ctaLabel  = lang === 'en' ? 'Book' : 'Записаться';
+const ctaHref   = lang === 'en'
+  ? `https://wa.me/${contacts.whatsappNumber}?text=${encodeURIComponent('Hi Masha!')}`
+  : `https://wa.me/${contacts.whatsappNumber}?text=${encodeURIComponent('Здравствуйте, Маша!')}`;
+
+const logoName = 'Маша Шишкова';
+const logoSub  = lang === 'en' ? 'guide in Campania' : 'гид в Кампании';
+---
+<nav class="nav nav--scrolled" id="nav" data-lang={lang}>
+  <div class="nav__inner">
+    <a href={home} class="nav__logo">
+      <span class="nav__logo-name">{logoName}</span>
+      <span class="nav__logo-sub">{logoSub}</span>
+    </a>
+
+    <ul class="nav__links" id="navLinks">
+      {links.map(l => (
+        <li>
+          <a href={l.href}>
+            <span class="nav__link-icon" set:html={iconSvg(l.icon)} />
+            <span class="nav__link-text">{l.label}</span>
+          </a>
+        </li>
+      ))}
+      <li class="nav__cta-wrap">
+        <a href={ctaHref} target="_blank" rel="noopener" class="nav__cta">
+          <span class="nav__link-icon" set:html={iconSvg('message-circle')} />
+          <span class="nav__link-text">{ctaLabel}</span>
+        </a>
+      </li>
+      <li class="nav__socials" aria-label={lang === 'en' ? 'Social media' : 'Социальные сети'}>
+        <a href={`https://wa.me/${contacts.whatsappNumber}`} target="_blank" rel="noopener" aria-label="WhatsApp" set:html={iconSvg('message-circle')} />
+        <a href={contacts.telegram} target="_blank" rel="noopener" aria-label="Telegram" set:html={iconSvg('send')} />
+        <a href={contacts.instagram} target="_blank" rel="noopener" aria-label="Instagram" set:html={iconSvg('instagram')} />
+        <a href={`mailto:${contacts.email}`} aria-label="Email" set:html={iconSvg('mail')} />
+      </li>
+    </ul>
+
+    <div class="lang-switch" id="langToggle" role="group" aria-label="Language">
+      <span class="lang-switch__thumb" aria-hidden="true"></span>
+      <button type="button" class="lang-switch__opt" data-lang="ru" aria-label="Русский">RU</button>
+      <button type="button" class="lang-switch__opt" data-lang="en" aria-label="English">EN</button>
+    </div>
+
+    <button class="nav__toggle" aria-label="Menu" id="navToggle">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<script is:inline>
+  // Mobile menu toggle + body scroll lock when open
+  (function() {
+    const navToggle = document.getElementById('navToggle');
+    const navLinks  = document.getElementById('navLinks');
+    if (!navToggle || !navLinks) return;
+    const setOpen = (open) => {
+      navLinks.classList.toggle('nav__links--open', open);
+      navToggle.classList.toggle('nav__toggle--open', open);
+      document.body.style.overflow = open ? 'hidden' : '';
+    };
+    navToggle.addEventListener('click', () => {
+      setOpen(!navLinks.classList.contains('nav__links--open'));
+    });
+    navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setOpen(false)));
+  })();
+
+  // Lang switch — navigates between / and /en/ on subpages.
+  (function() {
+    const lt = document.getElementById('langToggle');
+    if (!lt) return;
+    const currentLang = lt.closest('[data-lang]')?.dataset.lang || 'ru';
+    document.documentElement.dataset.lang = currentLang;
+    lt.addEventListener('click', (e) => {
+      const opt = e.target.closest('[data-lang]');
+      if (!opt) return;
+      const next = opt.dataset.lang;
+      if (next === currentLang) return;
+      window.location.href = next === 'en' ? '/en/' : '/';
+    });
+  })();
+</script>
+
+<style>
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    transition: background 0.4s var(--ease), box-shadow 0.4s var(--ease), padding 0.3s var(--ease);
+    padding: 0.5rem 0;
+    background: rgba(254, 252, 247, 0.92);
+    backdrop-filter: blur(18px) saturate(1.2);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+    box-shadow: 0 1px 0 rgba(30, 24, 18, 0.06);
+  }
+  .nav__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 clamp(1.25rem, 4vw, 2.5rem);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .nav__logo {
+    display: flex; flex-direction: column; line-height: 1;
+    color: var(--ink); text-decoration: none;
+    margin-right: auto;
+    z-index: 1001;
+  }
+  .nav__logo-name {
+    font-family: var(--serif, 'Cormorant Infant', Georgia, serif);
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .nav__logo-sub {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 0.2rem;
+    opacity: 0.7;
+  }
+
+  .nav__links {
+    display: flex; gap: 0.25rem; align-items: center;
+    list-style: none; padding: 0; margin: 0;
+  }
+  .nav__links a {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    color: var(--ink);
+    font-size: 0.92rem;
+    font-weight: 500;
+    padding: 0.55em 1.1em;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: all 0.25s var(--ease);
+  }
+  .nav__links a:hover { background: rgba(196, 98, 45, 0.10); color: var(--terra); }
+
+  /* Hide icons + socials in desktop layout */
+  .nav__link-icon { display: none; }
+  .nav__socials { display: none; }
+  .nav__cta-wrap { display: contents; }
+
+  .nav__cta {
+    background: var(--ink) !important;
+    color: var(--cream, #fefcf7) !important;
+    border: 1.5px solid var(--ink);
+  }
+  .nav__cta:hover { background: var(--terra) !important; border-color: var(--terra); color: #fff !important; }
+
+  /* Lang switch — solid (always-scrolled) variant for subpages */
+  .lang-switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: 3px;
+    border-radius: 999px;
+    background: var(--cream-light, #fff);
+    border: 1px solid var(--line);
+    box-shadow: 0 1px 3px rgba(30, 24, 18, 0.06);
+    user-select: none;
+    isolation: isolate;
+  }
+  .lang-switch__thumb {
+    position: absolute;
+    top: 3px; left: 3px;
+    width: calc(50% - 3px);
+    bottom: 3px;
+    background: var(--ink);
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    transition: transform 0.35s var(--ease);
+    z-index: 0;
+  }
+  :global(html[data-lang="en"]) .lang-switch__thumb { transform: translateX(100%); }
+  .lang-switch__opt {
+    position: relative;
+    z-index: 1;
+    padding: 0.5em 0.95em;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft, #6b5d4a);
+    min-width: 40px;
+    text-align: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color 0.3s var(--ease);
+  }
+  :global(html[data-lang="ru"]) .lang-switch__opt[data-lang="ru"],
+  :global(html[data-lang="en"]) .lang-switch__opt[data-lang="en"] {
+    color: var(--cream, #fefcf7);
+  }
+
+  /* Mobile toggle */
+  .nav__toggle {
+    display: none; flex-direction: column; gap: 5px;
+    padding: 6px; background: transparent; border: none; cursor: pointer;
+    z-index: 1001;
+    position: relative;
+  }
+  .nav__toggle span {
+    display: block; width: 26px; height: 2.5px;
+    background: var(--ink); border-radius: 2px;
+    transition: all 0.3s;
+  }
+  .nav__toggle--open span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+  .nav__toggle--open span:nth-child(2) { opacity: 0; }
+  .nav__toggle--open span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+  @media (max-width: 900px) {
+    .nav__toggle { display: flex; }
+    .lang-switch { z-index: 1001; }
+
+    /* Full-screen overlay below the nav header — fits viewport without scrolling */
+    .nav__links {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      height: 100dvh;
+      background: var(--cream);
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      gap: 0;
+      padding: calc(64px + 0.5rem) clamp(1.25rem, 5vw, 2rem) 1rem;
+      overflow: hidden;
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.35s var(--ease);
+      pointer-events: none;
+    }
+    .nav__links--open {
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+    .nav__links li { width: 100%; }
+
+    .nav__links a {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      width: 100%;
+      padding: 0.7rem 0.25rem;
+      border-radius: 0;
+      border-bottom: 1px solid var(--line);
+      font-family: var(--serif, 'Cormorant Infant', Georgia, serif);
+      font-size: clamp(1.15rem, 4.4vw, 1.5rem);
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+    }
+    .nav__links a:hover {
+      background: transparent;
+      color: var(--terra);
+    }
+
+    .nav__link-icon {
+      display: inline-flex;
+      align-items: center; justify-content: center;
+      flex-shrink: 0;
+      width: 26px; height: 26px;
+      color: var(--terra);
+    }
+    .nav__link-icon svg { width: 100%; height: 100%; }
+
+    /* Distinct color per top-level item icon for variety */
+    .nav__links li:nth-child(1) .nav__link-icon { color: var(--azure-deep); }
+    .nav__links li:nth-child(2) .nav__link-icon { color: var(--terra); }
+    .nav__links li:nth-child(3) .nav__link-icon { color: var(--lemon); }
+    .nav__links li:nth-child(4) .nav__link-icon { color: var(--olive); }
+    .nav__links li:nth-child(5) .nav__link-icon { color: var(--azure-light); }
+
+    .nav__cta-wrap {
+      display: block;
+      width: 100%;
+      margin-top: 1rem;
+    }
+    .nav__cta {
+      display: flex !important;
+      align-items: center; justify-content: center;
+      gap: 0.6rem;
+      width: 100%;
+      padding: 0.85rem 1.25rem !important;
+      border-radius: 999px;
+      background: var(--terra) !important;
+      border-color: var(--terra) !important;
+      color: #fff !important;
+      font-family: var(--sans);
+      font-size: 1rem !important;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      box-shadow: 0 4px 14px rgba(196, 98, 45, 0.28);
+    }
+    .nav__cta .nav__link-icon { color: #fff; width: 18px; height: 18px; }
+    .nav__cta:hover { background: var(--ink) !important; border-color: var(--ink) !important; color: #fff !important; }
+
+    .nav__socials {
+      display: flex !important;
+      justify-content: center;
+      gap: 0.7rem;
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+      border-bottom: none;
+    }
+    .nav__socials a {
+      display: inline-flex !important;
+      align-items: center; justify-content: center;
+      width: 46px; height: 46px;
+      padding: 0;
+      border-radius: 50%;
+      border-bottom: none;
+      background: var(--cream-light, #fff);
+      border: 1px solid var(--line);
+      transition: transform 0.2s var(--ease), border-color 0.2s var(--ease);
+    }
+    .nav__socials a:hover {
+      transform: translateY(-2px);
+      border-color: var(--terra);
+      background: var(--cream-light, #fff);
+    }
+    .nav__socials a:nth-child(1) { color: #25d366; }
+    .nav__socials a:nth-child(2) { color: #229ed9; }
+    .nav__socials a:nth-child(3) { color: #c13584; }
+    .nav__socials a:nth-child(4) { color: var(--terra); }
+    .nav__socials svg { width: 20px; height: 20px; }
+  }
+</style>

@@ -1,0 +1,43 @@
+---
+/** Renders 3 related tours from the same category, excluding the current one. */
+import { tours, type Tour } from '../data/tours';
+import TourCard from './TourCard.astro';
+
+interface Props {
+  current: Tour;
+  lang?: 'ru' | 'en';
+  /** Override the section heading. */
+  heading?: string;
+}
+const { current, lang = 'ru', heading } = Astro.props;
+
+const isEN = lang === 'en';
+const sameCat = tours.filter(t =>
+  t.id !== current.id &&
+  (isEN ? t.lang === 'en' : t.lang !== 'en') &&
+  (t.category === current.category ||
+   t.extraCategories?.includes(current.category) ||
+   current.extraCategories?.includes(t.category))
+).slice(0, 3);
+
+const fallback = sameCat.length === 0
+  ? tours.filter(t => t.id !== current.id && (isEN ? t.lang === 'en' : t.lang !== 'en')).slice(0, 3)
+  : sameCat;
+---
+{fallback.length > 0 && (
+  <section class="rt">
+    <h2 class="section-title section-title--center">{heading || (isEN ? 'You might also like' : 'Похожие экскурсии')}</h2>
+    <div class="rt__grid">
+      {fallback.map(t => <TourCard tour={t} lang={lang} />)}
+    </div>
+  </section>
+)}
+
+<style>
+  .rt { margin: 4rem 0 2rem; }
+  .rt__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+</style>

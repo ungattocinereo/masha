@@ -1,0 +1,101 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import ReviewsList from '../components/ReviewsList.astro';
+import { reviews, aggregateRating } from '../data/reviews';
+import { tours, contacts } from '../data/tours';
+import { iconSvg } from '../lib/icons';
+
+const canonical = 'https://masha.amalfi.day/reviews';
+const tourTitle = (id: string | null): string | undefined =>
+  id ? tours.find(t => t.id === id)?.title : undefined;
+
+const itemListSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Отзывы об экскурсиях с Машей Шишковой',
+  numberOfItems: reviews.length,
+  itemListElement: reviews.map((r, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    item: {
+      '@type': 'Review',
+      author: { '@type': 'Person', name: r.author + (r.authorLocation ? `, ${r.authorLocation}` : '') },
+      datePublished: `${r.date}-01`,
+      reviewBody: r.text,
+      reviewRating: { '@type': 'Rating', ratingValue: r.rating, bestRating: 5, worstRating: 1 },
+      itemReviewed: tourTitle(r.tourId) ? {
+        '@type': 'Service',
+        name: tourTitle(r.tourId),
+      } : { '@type': 'TravelAgency', name: 'Маша Шишкова — гид по Кампании' },
+    },
+  })),
+};
+
+const aggregateSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'TravelAgency',
+  '@id': 'https://masha.amalfi.day/#business',
+  name: 'Маша Шишкова — гид по Кампании',
+  url: 'https://masha.amalfi.day/',
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: aggregateRating.ratingValue.toFixed(1),
+    reviewCount: aggregateRating.reviewCount,
+    bestRating: 5,
+    worstRating: 1,
+  },
+};
+---
+<Layout
+  title={`Отзывы (${aggregateRating.reviewCount}) · Маша Шишкова — гид по Кампании`}
+  description={`Отзывы клиентов о приватных экскурсиях с лицензированным гидом Машей Шишковой. Средняя оценка ${aggregateRating.ratingValue.toFixed(1)} из 5.`}
+  canonical={canonical}
+  lang="ru"
+  alternates={[
+    { hreflang: 'ru', href: canonical },
+    { hreflang: 'x-default', href: canonical },
+  ]}
+  jsonLd={[itemListSchema, aggregateSchema]}
+>
+  <article class="reviews-page">
+    <div class="container">
+      <Breadcrumbs items={[
+        { name: 'Главная', url: 'https://masha.amalfi.day/' },
+        { name: 'Отзывы', url: canonical },
+      ]} />
+
+      <header class="reviews-page__head">
+        <p class="kicker">Что говорят гости</p>
+        <h1>Отзывы об экскурсиях</h1>
+        <div class="reviews-page__rating">
+          <span class="reviews-page__stars" aria-hidden="true">★★★★★</span>
+          <span><strong>{aggregateRating.ratingValue.toFixed(1)}</strong> из 5 · {aggregateRating.reviewCount} отзывов</span>
+        </div>
+      </header>
+
+      <ReviewsList />
+
+      <section class="reviews-page__cta">
+        <h2 class="section-title section-title--center">Хотите записаться?</h2>
+        <p>Опишите кратко, что интересует — отвечу в течение нескольких часов.</p>
+        <a class="btn btn--primary btn--lg" href={`https://wa.me/${contacts.whatsappNumber}?text=${encodeURIComponent('Здравствуйте, Маша!')}`} target="_blank" rel="noopener">
+          <span set:html={iconSvg('message-circle')} />
+          <span>Написать в WhatsApp</span>
+        </a>
+      </section>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .reviews-page { padding: 0 0 4rem; }
+  .reviews-page__head { margin: 1rem 0 2rem; text-align: center; }
+  .reviews-page__head h1 { font-family: var(--serif); font-size: clamp(2rem, 1.5rem + 2vw, 3rem); margin: 0.25rem 0 1rem; }
+  .reviews-page__rating { display: inline-flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; font-family: var(--serif); font-size: 1.1rem; }
+  .reviews-page__stars { color: var(--lemon); letter-spacing: 0.1em; }
+  .reviews-page__rating strong { color: var(--terra); font-size: 1.4rem; }
+  .reviews-page__cta { text-align: center; margin: 4rem 0 2rem; padding: 3rem 1.5rem; background: var(--cream-light); border-radius: 1rem; border: 1px solid var(--line); }
+  .reviews-page__cta p { max-width: 480px; margin: 0 auto 1.5rem; color: var(--ink-soft); }
+  .reviews-page__cta .btn svg { width: 18px; height: 18px; }
+</style>

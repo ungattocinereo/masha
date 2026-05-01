@@ -1,0 +1,122 @@
+---
+/** Renders a grid of Review cards. Filterable by tour ID and locale.
+ *  Emits per-Review microdata; aggregate Product+Review JSON-LD is emitted on
+ *  the home page, so this component is visual+microdata only by default. */
+import { reviews as allReviews, type Review } from '../data/reviews';
+import { tours } from '../data/tours';
+
+interface Props {
+  /** Filter by tour id; null = show all */
+  tourId?: string | null;
+  /** Max number of reviews to render (default: all) */
+  limit?: number;
+  heading?: string;
+  emitSchema?: boolean;
+  /** UI language. EN uses textEn / authorEn / authorLocationEn / tour.enTitle when present. */
+  lang?: 'ru' | 'en';
+}
+const { tourId = null, limit, heading, emitSchema = false, lang = 'ru' } = Astro.props;
+
+const filtered: Review[] = (tourId ? allReviews.filter(r => r.tourId === tourId) : allReviews)
+  .slice(0, limit);
+
+const tourTitle = (id: string | null): string | undefined => {
+  if (!id) return undefined;
+  const t = tours.find(t => t.id === id);
+  if (!t) return undefined;
+  return lang === 'en' ? (t.enTitle || t.title) : t.title;
+};
+
+const reviewText   = (r: Review) => lang === 'en' ? (r.textEn || r.text) : r.text;
+const reviewAuthor = (r: Review) => lang === 'en' ? (r.authorEn || r.author) : r.author;
+const reviewLoc    = (r: Review) => lang === 'en' ? (r.authorLocationEn || r.authorLocation) : r.authorLocation;
+
+const monthsRu = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const monthsEn = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+const dateText = (yyyymm: string): string => {
+  const [y, m] = yyyymm.split('-');
+  const months = lang === 'en' ? monthsEn : monthsRu;
+  return lang === 'en' ? `${months[Number(m) - 1]} ${y}` : `${months[Number(m) - 1]} ${y}`;
+};
+
+const itemReviewedName = lang === 'en'
+  ? 'Masha Shishkova — guide in Campania'
+  : 'Маша Шишкова — гид по Кампании';
+---
+{filtered.length > 0 && (
+  <section class="rl">
+    {heading && <h2 class="section-title section-title--center">{heading}</h2>}
+    <div class="rl__grid">
+      {filtered.map(r => {
+        const tn = tourTitle(r.tourId);
+        const loc = reviewLoc(r);
+        return (
+          <article class="rl__card" itemscope itemtype="https://schema.org/Review">
+            <meta itemprop="itemReviewed" content={itemReviewedName} />
+            <div class="rl__head">
+              <span class="rl__stars" aria-label={`${r.rating} ${lang === 'en' ? 'out of 5' : 'из 5'}`}>{'★'.repeat(r.rating)}<span class="rl__stars-empty">{'★'.repeat(5 - r.rating)}</span></span>
+              <span class="rl__date">{dateText(r.date)}</span>
+            </div>
+            <p class="rl__text" itemprop="reviewBody">{reviewText(r)}</p>
+            <div class="rl__foot">
+              <span class="rl__author" itemprop="author" itemscope itemtype="https://schema.org/Person">
+                <span itemprop="name">{reviewAuthor(r)}</span>{loc && <>, {loc}</>}
+              </span>
+              {tn && <span class="rl__tour">{tn}</span>}
+            </div>
+            <meta itemprop="reviewRating" content={String(r.rating)} />
+          </article>
+        );
+      })}
+    </div>
+  </section>
+)}
+
+{emitSchema && filtered.length > 0 && (
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: filtered.map((r, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'Review',
+        author: { '@type': 'Person', name: reviewAuthor(r) + (reviewLoc(r) ? `, ${reviewLoc(r)}` : '') },
+        datePublished: `${r.date}-01`,
+        reviewBody: reviewText(r),
+        reviewRating: { '@type': 'Rating', ratingValue: r.rating, bestRating: 5, worstRating: 1 },
+      },
+    })),
+  })} />
+)}
+
+<style>
+  .rl { margin: 2rem 0; }
+  .rl__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
+  .rl__card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    padding: 1.25rem 1.25rem 1rem;
+    display: flex; flex-direction: column;
+    transition: box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
+  }
+  .rl__card:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.07); transform: translateY(-2px); }
+  .rl__head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 0.6rem; font-size: 0.85rem;
+  }
+  .rl__stars { color: var(--lemon); letter-spacing: 0.05em; }
+  .rl__stars-empty { color: rgba(0,0,0,0.12); }
+  .rl__date { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .rl__text { font-family: var(--serif); font-size: 1.05rem; line-height: 1.55; flex: 1; margin: 0 0 1rem; }
+  .rl__foot {
+    display: flex; flex-direction: column; gap: 0.2rem;
+    padding-top: 0.7rem; border-top: 1px solid var(--line);
+    font-size: 0.85rem;
+  }
+  .rl__author { font-weight: 600; }
+  .rl__tour { color: var(--ink-soft); font-style: italic; }
+  @media (max-width: 600px) { .rl__grid { grid-template-columns: 1fr; } }
+</style>

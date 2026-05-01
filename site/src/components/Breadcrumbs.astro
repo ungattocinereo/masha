@@ -1,0 +1,44 @@
+---
+/** Breadcrumb trail with BreadcrumbList JSON-LD. Each item: {name, url}. Last item is current page (no link). */
+interface Crumb { name: string; url: string; }
+interface Props { items: Crumb[]; }
+const { items } = Astro.props;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: items.map((c, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: c.name,
+    item: c.url,
+  })),
+};
+---
+<nav class="breadcrumbs" aria-label="breadcrumb">
+  <ol>
+    {items.map((c, i) => (
+      <li>
+        {i < items.length - 1 ? (
+          <>
+            <a href={c.url}>{c.name}</a>
+            <span class="breadcrumbs__sep" aria-hidden="true">›</span>
+          </>
+        ) : (
+          <span aria-current="page">{c.name}</span>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+<style>
+  .breadcrumbs { font-size: 0.85rem; color: var(--ink-soft); margin: 1.5rem 0 1rem; }
+  .breadcrumbs ol { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0; }
+  .breadcrumbs li { display: inline-flex; align-items: center; }
+  .breadcrumbs a { color: var(--ink-soft); }
+  .breadcrumbs a:hover { color: var(--terra); }
+  .breadcrumbs__sep { margin: 0 0.5rem; opacity: 0.5; }
+  .breadcrumbs [aria-current="page"] { color: var(--ink); font-weight: 500; }
+</style>

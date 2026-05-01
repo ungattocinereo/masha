@@ -1,5 +1,17 @@
 ---
 import { tours, categories, about, contacts } from '../data/tours';
+import { reviews, aggregateRating } from '../data/reviews';
+import { iconSvg } from '../lib/icons';
+import { colorForCategory } from '../lib/gradients';
+
+const tourTitleById = (id: string | null): string | undefined =>
+  id ? tours.find(t => t.id === id)?.title : undefined;
+
+const reviewDate = (yyyymm: string): string => {
+  const [y, m] = yyyymm.split('-');
+  const months = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+  return `${months[Number(m) - 1]} ${y}`;
+};
 
 const ruTours = tours.filter(t => t.lang !== 'en');
 const enTours = tours.filter(t => t.lang === 'en');
@@ -36,50 +48,6 @@ const mdToHtmlServer = (s: string | undefined): string => {
 const licenseUrl = about.licenseUrl;
 const qrSrc = '/images/ministry-qr.svg';
 
-// ============ Inline Lucide SVG icons ============
-// Icons use stroke="currentColor" by default; CSS applies gradient via stroke url.
-const ICON_ATTRS = 'xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
-
-const ICONS: Record<string, string> = {
-  'mountain':       `<svg ${ICON_ATTRS}><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg>`,
-  'castle':         `<svg ${ICON_ATTRS}><path d="M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"/><path d="M18 11V4H6v7"/><path d="M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"/><path d="M22 11V9"/><path d="M2 11V9"/><path d="M6 4V2"/><path d="M18 4V2"/><path d="M10 4V2"/><path d="M14 4V2"/></svg>`,
-  'waves':          `<svg ${ICON_ATTRS}><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>`,
-  'puzzle':         `<svg ${ICON_ATTRS}><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.501 2.501 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704L4.23 8.77c.24-.24.581-.353.917-.303.515.077.877.528 1.073 1.01a2.5 2.5 0 1 0 3.259-3.259c-.482-.196-.933-.558-1.01-1.073-.05-.336.062-.676.303-.917l1.609-1.61a2.402 2.402 0 0 1 1.704-.707c.617 0 1.234.236 1.704.706l1.568 1.568c.23.23.556.338.877.29.493-.074.84-.504 1.02-.968a2.5 2.5 0 1 1 3.237 3.237c-.464.18-.894.527-.967 1.02Z"/></svg>`,
-  'sailboat':       `<svg ${ICON_ATTRS}><path d="M22 18H2a4 4 0 0 0 4 4h12a4 4 0 0 0 4-4Z"/><path d="M21 14 10 2 3 14h18Z"/><path d="M10 2v16"/></svg>`,
-  'compass':        `<svg ${ICON_ATTRS}><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`,
-  'play-circle':    `<svg ${ICON_ATTRS}><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>`,
-  'sparkles':       `<svg ${ICON_ATTRS}><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>`,
-  'graduation-cap': `<svg ${ICON_ATTRS}><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>`,
-  'map-pin':        `<svg ${ICON_ATTRS}><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>`,
-  'scroll-text':    `<svg ${ICON_ATTRS}><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg>`,
-  'clock':          `<svg ${ICON_ATTRS}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
-  'users':          `<svg ${ICON_ATTRS}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
-  'message-circle': `<svg ${ICON_ATTRS}><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z"/></svg>`,
-  'send':           `<svg ${ICON_ATTRS}><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg>`,
-  'instagram':      `<svg ${ICON_ATTRS}><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>`,
-  'facebook':       `<svg ${ICON_ATTRS}><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>`,
-  'mail':           `<svg ${ICON_ATTRS}><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`,
-  'wallet':         `<svg ${ICON_ATTRS}><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>`,
-  'route':          `<svg ${ICON_ATTRS}><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>`,
-  'book-open':      `<svg ${ICON_ATTRS}><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>`,
-  'heart-handshake':`<svg ${ICON_ATTRS}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66"/><path d="m18 15-2-2"/><path d="m15 18-2-2"/></svg>`,
-  'quote':          `<svg ${ICON_ATTRS}><path d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h3c0 2.5-2 4.5-4.5 4.5"/><path d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h3c0 2.5-2 4.5-4.5 4.5"/></svg>`,
-  'layers':         `<svg ${ICON_ATTRS}><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>`,
-};
-
-const iconSvg = (name: string): string => ICONS[name] || ICONS['sparkles'];
-
-const CATEGORY_GRADIENTS: Record<string, string> = {
-  naples:  'grad-terra-lemon',
-  pompeii: 'grad-azure-terra',
-  amalfi:  'grad-lemon-olive',
-  quests:  'grad-terra-lemon',
-  sea:     'grad-azure-sky',
-  multi:   'grad-azure-terra',
-  couch:   'grad-azure-sky',
-  extra:   'grad-lemon-olive',
-};
-const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'grad-azure-terra';
 ---
 
 <html lang="ru" data-lang="ru">
@@ -88,15 +56,27 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- SEO: title & description -->
-  <title>Маша Шишкова — лицензированный гид по Неаполю, Помпеям и Амальфи</title>
-  <meta name="description" content="Авторские экскурсии по Неаполю, Помпеям, Геркулануму, Амальфитанскому побережью, Равелло и Капри. Квесты для детей, дегустации, морские прогулки. Лицензированный гид Regione Campania." />
+  <title>Гид в Неаполе и на Амальфи · Маша Шишкова — авторские экскурсии</title>
+  <meta name="description" content="Авторские экскурсии по Неаполю, Помпеям и Амальфитанскому побережью с лицензированным гидом. Без предоплаты, маршрут под вас. Запись в WhatsApp за пару часов." />
   <link rel="canonical" href="https://masha.amalfi.day/" />
-  <meta name="robots" content="index, follow" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
 
-  <!-- Alternate language -->
+  <!-- Alternate language: ru → /, en → /en/, x-default → / -->
   <link rel="alternate" hreflang="ru" href="https://masha.amalfi.day/" />
-  <link rel="alternate" hreflang="en" href="https://masha.amalfi.day/" />
+  <link rel="alternate" hreflang="en" href="https://masha.amalfi.day/en/" />
   <link rel="alternate" hreflang="x-default" href="https://masha.amalfi.day/" />
+
+  <!-- Search engine verifications (replace placeholder values when registered) -->
+  <!-- TODO(seo): replace with real token from https://webmaster.yandex.com -->
+  <meta name="yandex-verification" content="REPLACE_WITH_YANDEX_TOKEN" />
+  <!-- TODO(seo): replace with real token from https://search.google.com/search-console -->
+  <meta name="google-site-verification" content="REPLACE_WITH_GSC_TOKEN" />
+
+  <!-- Favicon & PWA icons -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="alternate icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+  <link rel="manifest" href="/manifest.webmanifest" />
 
   <!-- Theme & mobile -->
   <meta name="theme-color" content="#1a6b8a" />
@@ -104,28 +84,34 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
+  <!-- Performance: preload hero LCP image and critical font -->
+  <link rel="preload" as="image" href="/images/bg-hero.webp" fetchpriority="high" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+        href="https://fonts.gstatic.com/s/cormorantinfant/v17/HhyIU44g9vKiM1sORYSiWeAsLN_-pBcHRiBuU8L8YYE6.woff2" />
+
   <!-- Open Graph (Facebook, Instagram, WhatsApp, Telegram) -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://masha.amalfi.day/" />
-  <meta property="og:title" content="Маша Шишкова — гид по Неаполю, Помпеям и Амальфи" />
-  <meta property="og:description" content="Авторские экскурсии по южной Италии. Неаполь, Помпеи, Геркуланум, Амальфитанское побережье, Равелло, Капри. Квесты, дегустации, морские прогулки. Лицензия Regione Campania." />
+  <meta property="og:title" content="Гид в Неаполе и на Амальфи · Маша Шишкова" />
+  <meta property="og:description" content="Авторские экскурсии по Неаполю, Помпеям и Амальфитанскому побережью с лицензированным гидом. Маршрут под вас, оплата на месте, ответ в WhatsApp за пару часов." />
   <meta property="og:image" content="https://masha.amalfi.day/images/bg-hero.webp" />
+  <meta property="og:image:type" content="image/webp" />
   <meta property="og:image:width" content="2689" />
   <meta property="og:image:height" content="1536" />
   <meta property="og:image:alt" content="Амальфитанское побережье — экскурсии с Машей Шишковой" />
   <meta property="og:locale" content="ru_RU" />
   <meta property="og:locale:alternate" content="en_US" />
-  <meta property="og:site_name" content="Маша Шишкова — гид" />
+  <meta property="og:site_name" content="Маша Шишкова — гид по Кампании" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Маша Шишкова — гид по Неаполю, Помпеям и Амальфи" />
-  <meta name="twitter:description" content="Авторские экскурсии по южной Италии. Лицензированный гид Regione Campania. Квесты, дегустации, морские прогулки." />
+  <meta name="twitter:title" content="Гид в Неаполе и на Амальфи · Маша Шишкова" />
+  <meta name="twitter:description" content="Авторские экскурсии с лицензированным гидом. Неаполь, Помпеи, Амальфи, Равелло, Капри. Квесты, гастротуры, морские прогулки." />
   <meta name="twitter:image" content="https://masha.amalfi.day/images/bg-hero.webp" />
   <meta name="twitter:image:alt" content="Амальфитанское побережье — экскурсии с Машей Шишковой" />
 
-  <!-- Keywords (secondary signal) -->
-  <meta name="keywords" content="гид Неаполь, экскурсии Помпеи, Амальфи побережье, Равелло, Капри, Геркуланум, лицензированный гид Кампания, Маша Шишкова, экскурсии Италия, квесты Неаполь, гастротур Неаполь, морская прогулка Амальфи" />
+  <!-- Keywords (Yandex still respects this) -->
+  <meta name="keywords" content="гид в Неаполе, гид на Амальфи, экскурсии Помпеи, гид Равелло, экскурсии Капри, экскурсия Геркуланум, лицензированный гид Кампания, русскоязычный гид Италия, Маша Шишкова, квесты для детей Помпеи, гастротур Неаполь, морская прогулка Амальфи, восхождение Везувий, мастер-класс моцарелла, Пестум экскурсия, индивидуальный маршрут Италия" />
 
   <!-- Structured Data: JSON-LD -->
   <script type="application/ld+json" set:html={JSON.stringify({
@@ -188,6 +174,182 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
     }
   })} />
 
+  <!-- Structured Data: TravelAgency / LocalBusiness — for SERP rich snippets and local pack -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "TravelAgency",
+    "@id": "https://masha.amalfi.day/#business",
+    "name": "Маша Шишкова — гид по Кампании",
+    "alternateName": ["Masha Shishkova Guide", "Маша Шишкова гид Амальфи"],
+    "description": "Лицензированный гид по Неаполю, Помпеям, Геркулануму, Амальфитанскому побережью, Равелло и Капри. Авторские экскурсии, квесты для детей, гастротуры, морские прогулки.",
+    "url": "https://masha.amalfi.day/",
+    "image": [
+      "https://masha.amalfi.day/images/masha.jpg",
+      "https://masha.amalfi.day/images/bg-hero.webp"
+    ],
+    "logo": "https://masha.amalfi.day/apple-touch-icon.png",
+    "telephone": "+79219594978",
+    "email": contacts.email,
+    "priceRange": "€40–€1500",
+    "currenciesAccepted": "EUR",
+    "paymentAccepted": "Cash, Bank Transfer",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Maiori",
+      "addressRegion": "Campania",
+      "postalCode": "84010",
+      "addressCountry": "IT"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 40.6510,
+      "longitude": 14.6378
+    },
+    "areaServed": [
+      { "@type": "City", "name": "Naples" },
+      { "@type": "City", "name": "Pompeii" },
+      { "@type": "City", "name": "Herculaneum" },
+      { "@type": "City", "name": "Amalfi" },
+      { "@type": "City", "name": "Ravello" },
+      { "@type": "City", "name": "Capri" },
+      { "@type": "City", "name": "Paestum" },
+      { "@type": "AdministrativeArea", "name": "Campania" }
+    ],
+    "openingHoursSpecification": [{
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+      "opens": "08:00",
+      "closes": "20:00"
+    }],
+    "sameAs": [
+      contacts.instagram,
+      contacts.facebook,
+      contacts.telegram
+    ],
+    "hasCredential": {
+      "@type": "EducationalOccupationalCredential",
+      "credentialCategory": "license",
+      "name": "Licenza guida turistica Regione Campania",
+      "url": about.licenseUrl
+    },
+    "founder": {
+      "@type": "Person",
+      "name": "Маша Шишкова",
+      "alternateName": "Masha Shishkova",
+      "jobTitle": "Лицензированный гид",
+      "knowsLanguage": ["ru", "en", "it"],
+      "image": "https://masha.amalfi.day/images/masha.jpg"
+    },
+    "knowsLanguage": ["ru", "en", "it"],
+    "contactPoint": [{
+      "@type": "ContactPoint",
+      "contactType": "customer service",
+      "telephone": "+79219594978",
+      "email": contacts.email,
+      "availableLanguage": ["Russian", "English", "Italian"]
+    }]
+  })} />
+
+  <!-- Structured Data: FAQ — high-impact rich snippet for tourism vertical -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Нужна ли предоплата за экскурсию?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Нет, предоплата не требуется. Оплата производится на месте наличными или переводом — после экскурсии."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "На каких языках проводятся экскурсии?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Экскурсии проводятся на русском, английском и итальянском языках. Маша — лицензированный гид Regione Campania, языки подтверждены лицензией."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Включены ли входные билеты в стоимость экскурсии?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Нет, входные билеты (Помпеи €20, Геркуланум, Капелла Сан Северо €12, виллы в Равелло €8–10, Собор в Амальфи €3) оплачиваются отдельно. Их можно купить заранее или на месте, Маша поможет с покупкой."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Подходят ли экскурсии для детей?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Да. Есть специальные квесты для детей: «Голы Марадоны» в Неаполе, квест по Помпеям, индивидуальные сценарии под возраст и интересы. Все маршруты адаптируются под темп и возможности участников."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Сколько человек может быть в группе?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Базовая стоимость указана для группы до 4 человек. Каждый дополнительный участник — €20–30 в зависимости от экскурсии. Максимальный размер группы — 6–10 человек, зависит от маршрута."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Можно ли совместить Помпеи и Геркуланум за один день?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Да, это популярный формат. Также Помпеи можно сочетать с Археологическим музеем Неаполя или с виллами (Ариадны, Сан Марко, Поппеи, Реджина). Маша поможет выстроить логистику."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Как записаться на экскурсию?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Самый быстрый способ — написать в WhatsApp на номер +7 921 959-49-78. Ответ обычно в течение нескольких часов. Также можно через Telegram @amalfitanskiekanikuly или email marshishkova@gmail.com."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Маша — лицензированный гид?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Да, Маша Шишкова — лицензированный гид Regione Campania. Лицензию можно проверить в реестре Министерства туризма Италии: portaleprofessioni.ministeroturismo.gov.it."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Можно ли составить индивидуальный маршрут под свои даты и интересы?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Да. Стоимость составления индивидуального маршрута под ключ — €100. Также для тех, кто заказал экскурсию, бесплатно доступны консультации по жилью, трансферам и билетам в музеи."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Что делать, если я ещё не в Италии?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Можно начать с серии видео-экскурсий «На диване» в Telegram-канале @amalfitanskiekanikuly — бесплатно. Также доступна Zoom-консультация по планированию путешествия за €40."
+        }
+      }
+    ]
+  })} />
+
+  <!-- Yandex.Metrika counter — TODO(seo): replace XXXXXXXX with real counter ID -->
+  <!-- Get one at https://metrika.yandex.com -->
+  <script is:inline>
+    (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+    m[i].l=1*new Date();
+    for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+    k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+    (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+    // ym(XXXXXXXX, "init", { clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true });
+  </script>
+  <noscript><div><img src="https://mc.yandex.ru/watch/XXXXXXXX" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-2B105VCL69"></script>
   <script is:inline>
@@ -205,28 +367,6 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
 
 <body>
 
-  <!-- GRADIENT DEFS FOR LUCIDE ICONS -->
-  <svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true">
-    <defs>
-      <linearGradient id="grad-azure-terra" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#1a6b8a"/>
-        <stop offset="100%" stop-color="#c4622d"/>
-      </linearGradient>
-      <linearGradient id="grad-lemon-olive" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#d9a441"/>
-        <stop offset="100%" stop-color="#6b7c3e"/>
-      </linearGradient>
-      <linearGradient id="grad-terra-lemon" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#c4622d"/>
-        <stop offset="100%" stop-color="#d9a441"/>
-      </linearGradient>
-      <linearGradient id="grad-azure-sky" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#0d4a5e"/>
-        <stop offset="100%" stop-color="#2b8fad"/>
-      </linearGradient>
-    </defs>
-  </svg>
-
   <!-- ============ NAV ============ -->
   <nav class="nav" id="nav">
     <div class="nav__inner">
@@ -236,11 +376,48 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       </a>
 
       <ul class="nav__links" id="navLinks">
-        <li><a href="#about"   data-i18n="nav.about">Обо мне</a></li>
-        <li><a href="#tours"   data-i18n="nav.tours">Экскурсии</a></li>
-        <li><a href="#couch"   data-i18n="nav.couch">На диване</a></li>
-        <li><a href="#contact" data-i18n="nav.contact">Контакты</a></li>
-        <li><a href="#form" class="nav__cta" data-i18n="nav.book">Записаться</a></li>
+        <li>
+          <a href="#about" data-i18n="nav.about">
+            <span class="nav__link-icon" set:html={iconSvg('graduation-cap')} />
+            <span class="nav__link-text">Обо мне</span>
+          </a>
+        </li>
+        <li>
+          <a href="#tours" data-i18n="nav.tours">
+            <span class="nav__link-icon" set:html={iconSvg('compass')} />
+            <span class="nav__link-text">Экскурсии</span>
+          </a>
+        </li>
+        <li>
+          <a href="#reviews" data-i18n="nav.reviews">
+            <span class="nav__link-icon" set:html={iconSvg('star')} />
+            <span class="nav__link-text">Отзывы</span>
+          </a>
+        </li>
+        <li>
+          <a href="#couch" data-i18n="nav.couch">
+            <span class="nav__link-icon" set:html={iconSvg('play-circle')} />
+            <span class="nav__link-text">На диване</span>
+          </a>
+        </li>
+        <li>
+          <a href="#contact" data-i18n="nav.contact">
+            <span class="nav__link-icon" set:html={iconSvg('mail')} />
+            <span class="nav__link-text">Контакты</span>
+          </a>
+        </li>
+        <li class="nav__cta-wrap">
+          <a href="#form" class="nav__cta" data-i18n="nav.book">
+            <span class="nav__link-icon" set:html={iconSvg('message-circle')} />
+            <span class="nav__link-text">Записаться</span>
+          </a>
+        </li>
+        <li class="nav__socials" aria-label="Социальные сети">
+          <a href={`https://wa.me/${contacts.whatsappNumber}`} target="_blank" rel="noopener" aria-label="WhatsApp" set:html={iconSvg('message-circle')} />
+          <a href={contacts.telegram} target="_blank" rel="noopener" aria-label="Telegram" set:html={iconSvg('send')} />
+          <a href={contacts.instagram} target="_blank" rel="noopener" aria-label="Instagram" set:html={iconSvg('instagram')} />
+          <a href={`mailto:${contacts.email}`} aria-label="Email" set:html={iconSvg('mail')} />
+        </li>
       </ul>
 
       <div class="lang-switch" id="langToggle" role="group" aria-label="Language">
@@ -284,7 +461,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       <div class="hero__actions">
         <a href="#tours" class="btn btn--cta btn--lg">
           <span data-i18n="hero.cta.primary">Выбрать экскурсию</span>
-          <svg class="btn--cta__arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 5 7 7-7 7"/></svg>
+          <span set:html={iconSvg('arrow-right', { size: 20, className: 'btn--cta__arrow' })} />
         </a>
         <a href={`https://wa.me/${contacts.whatsappNumber}?text=${encodeURIComponent('Здравствуйте, Маша!')}`}
            target="_blank" rel="noopener"
@@ -292,14 +469,14 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       </div>
 
       <a class="hero__license" href={licenseUrl} target="_blank" rel="noopener">
-        <svg class="hero__license-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        <span set:html={iconSvg('shield-check', { size: 14, className: 'hero__license-icon' })} />
         <span data-i18n="hero.license.label">Лицензия Regione Campania</span>
         <span class="hero__license-arrow" aria-hidden="true">↗</span>
       </a>
     </div>
 
     <a href="#about" class="hero__scroll" aria-label="Scroll" data-i18n-aria="hero.scroll.aria">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+      <span set:html={iconSvg('arrow-down', { size: 24 })} />
     </a>
   </section>
 
@@ -329,7 +506,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
                      poster="/images/masha.jpg"
                      aria-label={about.name}>
                 <source src="/video/masha-vert.mp4" type="video/mp4" />
-                <img src="/images/masha.jpg" alt={about.name} />
+                <img src="/images/masha.jpg" alt="Маша Шишкова — лицензированный гид по Кампании" width="1365" height="1365" />
               </video>
             </div>
             <div class="polaroid__caption">
@@ -354,7 +531,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
         <article class="pillar">
           <span class="pillar__num">01</span>
           <span class="pillar__icon">
-            <span class="icon icon--lg" style="--grad: url(#grad-terra-lemon)" set:html={iconSvg('heart-handshake')} />
+            <span class="icon icon--lg icon--terra" set:html={iconSvg('heart-handshake')} />
           </span>
           <p class="pillar__label" data-i18n="about.pillar1.label">Подход</p>
           <p class="pillar__text"  data-i18n="about.pillar1.text">{about.bio[0]}</p>
@@ -362,7 +539,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
         <article class="pillar">
           <span class="pillar__num">02</span>
           <span class="pillar__icon">
-            <span class="icon icon--lg" style="--grad: url(#grad-azure-terra)" set:html={iconSvg('book-open')} />
+            <span class="icon icon--lg icon--azure" set:html={iconSvg('book-open')} />
           </span>
           <p class="pillar__label" data-i18n="about.pillar2.label">Формат</p>
           <p class="pillar__text"  data-i18n="about.pillar2.text">{about.bio[1]}</p>
@@ -370,7 +547,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
         <article class="pillar">
           <span class="pillar__num">03</span>
           <span class="pillar__icon">
-            <span class="icon icon--lg" style="--grad: url(#grad-lemon-olive)" set:html={iconSvg('puzzle')} />
+            <span class="icon icon--lg icon--olive" set:html={iconSvg('puzzle')} />
           </span>
           <p class="pillar__label" data-i18n="about.pillar3.label">Для любопытных</p>
           <p class="pillar__text"  data-i18n="about.pillar3.text">{about.bio[2]}</p>
@@ -406,7 +583,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
             <span class="chip__text" data-i18n="chip.all">Все</span>
           </button>
           {visibleCategories.map((cat) => (
-            <button class="chip" data-category={cat.id} role="tab" style={`--grad: url(#${gradForCategory(cat.id)})`}>
+            <button class={`chip chip--${colorForCategory(cat.id)}`} data-category={cat.id} role="tab">
               <span class="chip__icon" set:html={iconSvg(cat.icon)} />
               <span class="chip__text" data-i18n={`category.${cat.id}`}>{cat.name}</span>
             </button>
@@ -418,22 +595,22 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       <div class="tours__grid" data-lang-only="ru">
         {ruTours.map((tour, idx) => {
           const cat = categories.find(c => c.id === tour.category);
-          const gradId = gradForCategory(tour.category);
+          const catColor = colorForCategory(tour.category);
           return (
             <article class="card" data-category={tourCategoryList(tour)} style={`--delay: ${(idx % 9) * 0.05}s`}>
               {tour.externalUrl ? (
                 <a class="card__media" href={tour.externalUrl} target="_blank" rel="noopener">
-                  <img src={tour.image} alt={tour.title} loading="lazy" />
+                  <img src={tour.image} alt={tour.imageAlt || tour.title} loading="lazy" width="800" height="500" decoding="async" />
                   <span class="card__cat">
-                    <span class="icon icon--sm" style={`--grad: url(#${gradId})`} set:html={iconSvg(cat?.icon || 'sparkles')} />
+                    <span class={`icon icon--sm icon--${catColor}`} set:html={iconSvg(cat?.icon || 'sparkles')} />
                     <span data-i18n={`category.${cat?.id}`}>{cat?.name}</span>
                   </span>
                 </a>
               ) : (
                 <button type="button" class="card__media card__media--clickable" data-modal-open data-tour-id={tour.id} aria-label={tour.title}>
-                  <img src={tour.image} alt={tour.title} loading="lazy" />
+                  <img src={tour.image} alt={tour.imageAlt || tour.title} loading="lazy" width="800" height="500" decoding="async" />
                   <span class="card__cat">
-                    <span class="icon icon--sm" style={`--grad: url(#${gradId})`} set:html={iconSvg(cat?.icon || 'sparkles')} />
+                    <span class={`icon icon--sm icon--${catColor}`} set:html={iconSvg(cat?.icon || 'sparkles')} />
                     <span data-i18n={`category.${cat?.id}`}>{cat?.name}</span>
                   </span>
                 </button>
@@ -492,7 +669,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       {enTour && (
         <article class="tour-feature" data-lang-only="en">
           <div class="tour-feature__media">
-            <img src={enTour.image} alt={enTour.title} loading="lazy" />
+            <img src={enTour.image} alt={enTour.imageAlt || enTour.title} loading="lazy" width="800" height="1000" decoding="async" />
           </div>
           <div class="tour-feature__body">
             <h3 class="tour-feature__title">{enTour.title}</h3>
@@ -519,7 +696,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
                 class="btn btn--cta btn--lg"
               >
                 <span>Book in WhatsApp</span>
-                <svg class="btn--cta__arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 5 7 7-7 7"/></svg>
+                <span set:html={iconSvg('arrow-right', { size: 20, className: 'btn--cta__arrow' })} />
               </a>
             </div>
           </div>
@@ -532,7 +709,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
   <section class="couch" id="couch">
     <div class="container couch__inner">
       <div class="couch__icon-wrap">
-        <span class="icon icon--xl" style="--grad: url(#grad-azure-sky)" set:html={iconSvg('play-circle')} />
+        <span class="icon icon--xl icon--sky" set:html={iconSvg('play-circle')} />
       </div>
       <div class="couch__text">
         <p class="kicker" data-i18n="couch.kicker">Для тех, кто пока не в Италии</p>
@@ -544,6 +721,83 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       </a>
     </div>
   </section>
+
+  <div class="divider" aria-hidden="true"></div>
+
+  <!-- ============ REVIEWS ============ -->
+  <section class="reviews" id="reviews">
+    <div class="container">
+      <p class="kicker kicker--center" data-i18n="reviews.kicker">Отзывы</p>
+      <h2 class="section-title section-title--center" data-i18n="reviews.title">Что говорят гости</h2>
+      <div class="reviews__rating-summary" aria-label={`Рейтинг ${aggregateRating.ratingValue.toFixed(1)} из 5 на основе ${aggregateRating.reviewCount} отзывов`}>
+        <span class="reviews__stars" aria-hidden="true">{'★'.repeat(5)}</span>
+        <span class="reviews__rating-text">
+          <strong>{aggregateRating.ratingValue.toFixed(1)}</strong>
+          <span data-i18n="reviews.outof">из 5</span>
+          <span class="reviews__sep">·</span>
+          <span>{aggregateRating.reviewCount}</span>&nbsp;
+          <span data-i18n="reviews.count">отзывов</span>
+        </span>
+      </div>
+
+      <div class="reviews__grid">
+        {reviews.map((r) => {
+          const tourName = tourTitleById(r.tourId);
+          return (
+            <article class="review" itemscope itemtype="https://schema.org/Review">
+              <meta itemprop="itemReviewed" content="Маша Шишкова — гид по Кампании" />
+              <div class="review__head">
+                <span class="review__stars" aria-label={`${r.rating} из 5`}>{'★'.repeat(r.rating)}<span class="review__stars-empty">{'★'.repeat(5 - r.rating)}</span></span>
+                <span class="review__date">{reviewDate(r.date)}</span>
+              </div>
+              <p class="review__text" itemprop="reviewBody">{r.text}</p>
+              <div class="review__foot">
+                <span class="review__author" itemprop="author" itemscope itemtype="https://schema.org/Person">
+                  <span itemprop="name">{r.author}</span>{r.authorLocation && <>, {r.authorLocation}</>}
+                </span>
+                {tourName && <span class="review__tour">{tourName}</span>}
+              </div>
+              <meta itemprop="reviewRating" content={String(r.rating)} />
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <!-- Per-review JSON-LD (separate from on-page microdata for max compatibility) -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Авторские экскурсии — Маша Шишкова",
+    "image": "https://masha.amalfi.day/images/bg-hero.webp",
+    "description": "Авторские экскурсии по Неаполю, Помпеям и Амальфитанскому побережью с лицензированным гидом Машей Шишковой.",
+    "brand": { "@type": "Brand", "name": "Маша Шишкова" },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": aggregateRating.ratingValue.toFixed(1),
+      "reviewCount": aggregateRating.reviewCount,
+      "bestRating": aggregateRating.bestRating,
+      "worstRating": aggregateRating.worstRating
+    },
+    "review": reviews.map(r => ({
+      "@type": "Review",
+      "author": { "@type": "Person", "name": r.author + (r.authorLocation ? `, ${r.authorLocation}` : '') },
+      "datePublished": `${r.date}-01`,
+      "reviewBody": r.text,
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": r.rating,
+        "bestRating": 5,
+        "worstRating": 1
+      },
+      "itemReviewed": tourTitleById(r.tourId) ? {
+        "@type": "Service",
+        "name": tourTitleById(r.tourId),
+        "provider": { "@type": "Person", "name": "Маша Шишкова" }
+      } : undefined
+    }))
+  })} />
 
   <div class="divider" aria-hidden="true"></div>
 
@@ -671,7 +925,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
   <!-- ============ MODAL ============ -->
   <dialog class="modal" id="tourModal">
     <button class="modal__close" aria-label="Close" data-i18n-aria="modal.close" data-modal-close>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      <span set:html={iconSvg('x', { size: 20 })} />
     </button>
     <div class="modal__body">
       <p class="modal__kicker" id="modalKicker"></p>
@@ -691,7 +945,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
   </dialog>
 
   <!-- ============ SCRIPTS ============ -->
-  <script is:inline define:vars={{ whatsappNumber: contacts.whatsappNumber, toursData: ruTours.concat(enTours) }}>
+  <script is:inline define:vars={{ whatsappNumber: contacts.whatsappNumber, toursData: ruTours.concat(enTours), clockSvg: iconSvg('clock', { size: 16 }), usersSvg: iconSvg('users', { size: 16 }) }}>
     // ====== WhatsApp URL builder ======
     function toWhatsApp({ name, tour, note, prefix }) {
       const lines = [
@@ -706,14 +960,15 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
     // ====== Mobile nav ======
     const navToggle = document.getElementById('navToggle');
     const navLinks = document.getElementById('navLinks');
+    const setNavOpen = (open) => {
+      navLinks?.classList.toggle('nav__links--open', open);
+      navToggle?.classList.toggle('nav__toggle--open', open);
+      document.body.style.overflow = open ? 'hidden' : '';
+    };
     navToggle?.addEventListener('click', () => {
-      navLinks?.classList.toggle('nav__links--open');
-      navToggle.classList.toggle('nav__toggle--open');
+      setNavOpen(!navLinks?.classList.contains('nav__links--open'));
     });
-    navLinks?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-      navLinks.classList.remove('nav__links--open');
-      navToggle?.classList.remove('nav__toggle--open');
-    }));
+    navLinks?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setNavOpen(false)));
 
     // ====== Sticky nav ======
     const nav = document.getElementById('nav');
@@ -788,8 +1043,8 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       mTitle.textContent = tour.title;
       mSubtitle.textContent = tour.subtitle || '';
       mMeta.innerHTML = [
-        tour.duration && `<span>⏱ ${tour.duration}</span>`,
-        tour.maxPeople && `<span>👥 ${tour.maxPeople}</span>`,
+        tour.duration && `<span class="modal__meta-item">${clockSvg} ${tour.duration}</span>`,
+        tour.maxPeople && `<span class="modal__meta-item">${usersSvg} ${tour.maxPeople}</span>`,
       ].filter(Boolean).join('');
       mLong.innerHTML = mdToHtml(tour.longDescription || tour.description);
       mExtras.textContent = tour.extras || '';
@@ -857,6 +1112,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
         'logo.sub':  'гид в Кампании',
         'nav.about':   'Обо мне',
         'nav.tours':   'Экскурсии',
+        'nav.reviews': 'Отзывы',
         'nav.couch':   'На диване',
         'nav.contact': 'Контакты',
         'nav.book':    'Записаться',
@@ -904,6 +1160,10 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
         'couch.title':  'Экскурсии на диване',
         'couch.text':   'Серия видео-прогулок от Маши в Telegram-канале. Путешествуйте по Амальфи, Помпеям и Неаполю, не вставая с дивана.',
         'couch.btn':    'Смотреть в Telegram',
+        'reviews.kicker': 'Отзывы',
+        'reviews.title':  'Что говорят гости',
+        'reviews.outof':  'из 5',
+        'reviews.count':  'отзывов',
         'form.kicker':  'Заявка',
         'form.title':   'Запишитесь на экскурсию',
         'form.lead':    'Расскажите коротко, что интересует — откроется чат в WhatsApp с уже заполненным сообщением.',
@@ -934,6 +1194,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
         'logo.sub':  'guide in Campania',
         'nav.about':   'About',
         'nav.tours':   'Tours',
+        'nav.reviews': 'Reviews',
         'nav.couch':   'Videos',
         'nav.contact': 'Contact',
         'nav.book':    'Book',
@@ -981,6 +1242,10 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
         'couch.title':  'Couch tours',
         'couch.text':   'A series of video walks from Masha on Telegram. Travel through Amalfi, Pompeii and Naples from your couch.',
         'couch.btn':    'Watch on Telegram',
+        'reviews.kicker': 'Reviews',
+        'reviews.title':  'What guests say',
+        'reviews.outof':  'out of 5',
+        'reviews.count':  'reviews',
         'form.kicker':  'Booking',
         'form.title':   'Book a tour',
         'form.lead':    "Tell me briefly what you're interested in — I'll open a WhatsApp chat with a pre-filled message.",
@@ -1060,6 +1325,11 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       const opt = e.target.closest('[data-lang]');
       const nextLang = opt?.dataset.lang
         || (document.documentElement.dataset.lang === 'en' ? 'ru' : 'en');
+      // EN now lives at its own URL — navigate there for SEO + indexing.
+      if (nextLang === 'en') {
+        window.location.href = '/en/';
+        return;
+      }
       setLang(nextLang);
     });
 
@@ -1181,7 +1451,7 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
     }
 
     /* ============ ICONS ============ */
-    .icon { display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; color: var(--azure); }
+    .icon { display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; color: var(--terracotta); }
     .icon svg { width: 100%; height: 100%; }
     .icon--xs { width: 14px; height: 14px; }
     .icon--sm { width: 18px; height: 18px; }
@@ -1189,9 +1459,20 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
     .icon--lg { width: 36px; height: 36px; }
     .icon--xl { width: 64px; height: 64px; }
 
-    /* gradient strokes for icons (not `.icon--plain`) */
-    .icon:not(.icon--plain) svg { stroke: var(--grad, url(#grad-azure-terra)); }
-    .icon:not(.icon--plain) svg * { stroke: var(--grad, url(#grad-azure-terra)); }
+    /* Icons inside buttons inherit button text color (so they don't blend with hover bg) */
+    .btn .icon, .btn .icon--terra, .btn .icon--azure, .btn .icon--lemon,
+    .btn .icon--olive, .btn .icon--sky, .btn .icon--mute, .btn .icon--ink,
+    .btn .icon--peach { color: inherit; }
+
+    /* solid icon colors — drive FA `fill="currentColor"` */
+    .icon--terra { color: var(--terracotta); }
+    .icon--azure { color: var(--azure-deep); }
+    .icon--lemon { color: var(--lemon); }
+    .icon--olive { color: var(--olive); }
+    .icon--sky   { color: var(--azure-light); }
+    .icon--mute  { color: var(--text-mute); }
+    .icon--ink   { color: var(--ink); }
+    .icon--peach { color: var(--terra-light); }
 
     /* ============ BUTTONS ============ */
     .btn {
@@ -1304,6 +1585,12 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
     .nav__links a:hover { color: #fff; background: rgba(255,255,255,0.12); }
     .nav--scrolled .nav__links a { color: var(--text); }
     .nav--scrolled .nav__links a:hover { background: var(--cream-warm); }
+
+    /* Desktop: hide icons + socials, render CTA inline */
+    .nav__link-icon { display: none; }
+    .nav__socials { display: none; }
+    .nav__cta-wrap { display: contents; }
+
     .nav__cta {
       border: 1.5px solid rgba(255,255,255,0.45);
       background: rgba(255,255,255,0.08);
@@ -1408,29 +1695,147 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       100% { background-position: -100% 0; }
     }
 
-    .nav__toggle { display: none; flex-direction: column; gap: 5px; padding: 6px; }
-    .nav__toggle span { display: block; width: 24px; height: 2px; background: #fff; border-radius: 2px; transition: all 0.3s; }
+    .nav__toggle { display: none; flex-direction: column; gap: 5px; padding: 6px; background: transparent; border: none; cursor: pointer; position: relative; z-index: 1001; }
+    .nav__toggle span { display: block; width: 26px; height: 2.5px; background: #fff; border-radius: 2px; transition: all 0.3s; }
     .nav--scrolled .nav__toggle span { background: var(--ink); }
-    .nav__toggle--open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav__toggle--open span { background: var(--ink) !important; }
+    .nav__toggle--open span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
     .nav__toggle--open span:nth-child(2) { opacity: 0; }
-    .nav__toggle--open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .nav__toggle--open span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
 
     @media (max-width: 900px) {
       .nav__toggle { display: flex; }
-      .nav__links {
-        display: none;
-        position: absolute; top: 100%; left: 0; right: 0;
-        flex-direction: column; gap: 0;
-        padding: 1rem;
-        background: rgba(254, 252, 247, 0.98);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        box-shadow: var(--shadow-md);
+      .nav__logo { z-index: 1001; position: relative; }
+
+      /* On mobile force lang-switch into solid (scrolled-style) palette so RU/EN
+         stay readable both over the dark hero AND over the cream menu overlay. */
+      .lang-switch {
+        z-index: 1001;
+        background: var(--paper) !important;
+        border-color: var(--line) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: 0 1px 3px rgba(30, 24, 18, 0.06) !important;
       }
-      .nav__links--open { display: flex; }
-      .nav__links a { color: var(--text) !important; padding: 0.8em 1.2em; }
-      .nav__cta { background: var(--ink) !important; color: var(--cream) !important; text-align: center; }
-      .lang-switch { order: 3; }
+      .lang-switch__thumb { background: var(--ink) !important; }
+      .lang-switch__opt { color: var(--text-mute) !important; }
+      html[data-lang="ru"] .lang-switch__opt[data-lang="ru"],
+      html[data-lang="en"] .lang-switch__opt[data-lang="en"] {
+        color: var(--cream) !important;
+      }
+
+      /* Full-screen overlay below the nav header — fits viewport without scrolling */
+      .nav__links {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        height: 100dvh;
+        background: var(--cream);
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 0;
+        padding: calc(64px + 0.5rem) clamp(1.25rem, 5vw, 2rem) 1rem;
+        overflow: hidden;
+        z-index: 1000;
+        transform: translateX(100%);
+        transition: transform 0.35s var(--ease);
+        pointer-events: none;
+      }
+      .nav__links--open {
+        transform: translateX(0);
+        pointer-events: auto;
+      }
+      .nav__links li { width: 100%; }
+
+      .nav__links a {
+        display: flex !important;
+        align-items: center;
+        gap: 0.9rem;
+        width: 100%;
+        padding: 0.7rem 0.25rem !important;
+        border-radius: 0;
+        border-bottom: 1px solid var(--line);
+        font-family: var(--font-display);
+        font-size: clamp(1.15rem, 4.4vw, 1.5rem) !important;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        color: var(--ink) !important;
+        background: transparent !important;
+      }
+      .nav__links a:hover {
+        background: transparent !important;
+        color: var(--terracotta) !important;
+      }
+
+      .nav__link-icon {
+        display: inline-flex !important;
+        align-items: center; justify-content: center;
+        flex-shrink: 0;
+        width: 26px; height: 26px;
+        color: var(--terracotta);
+      }
+      .nav__link-icon svg { width: 100%; height: 100%; }
+
+      /* Distinct color per top-level item icon */
+      .nav__links li:nth-child(1) .nav__link-icon { color: var(--azure-deep); }
+      .nav__links li:nth-child(2) .nav__link-icon { color: var(--terracotta); }
+      .nav__links li:nth-child(3) .nav__link-icon { color: var(--lemon); }
+      .nav__links li:nth-child(4) .nav__link-icon { color: var(--olive); }
+      .nav__links li:nth-child(5) .nav__link-icon { color: var(--azure-light); }
+
+      .nav__cta-wrap {
+        display: block;
+        width: 100%;
+        margin-top: 1rem;
+      }
+      .nav__cta {
+        display: flex !important;
+        align-items: center; justify-content: center;
+        gap: 0.6rem;
+        width: 100%;
+        padding: 0.85rem 1.25rem !important;
+        border-radius: 999px !important;
+        background: var(--terracotta) !important;
+        border: 1.5px solid var(--terracotta) !important;
+        color: #fff !important;
+        font-family: var(--font-body);
+        font-size: 1rem !important;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        box-shadow: 0 4px 14px rgba(196, 98, 45, 0.28);
+      }
+      .nav__cta .nav__link-icon { color: #fff !important; width: 18px; height: 18px; }
+      .nav__cta:hover { background: var(--ink) !important; border-color: var(--ink) !important; color: #fff !important; }
+
+      .nav__socials {
+        display: flex !important;
+        justify-content: center;
+        gap: 0.7rem;
+        margin-top: auto;
+        padding-top: 1rem;
+        border-top: 1px solid var(--line);
+      }
+      .nav__socials a {
+        display: inline-flex !important;
+        align-items: center; justify-content: center;
+        width: 46px; height: 46px;
+        padding: 0 !important;
+        border-radius: 50%;
+        background: var(--cream-light, #fff) !important;
+        border: 1px solid var(--line);
+        border-bottom: 1px solid var(--line) !important;
+        transition: transform 0.2s var(--ease), border-color 0.2s var(--ease);
+      }
+      .nav__socials a:hover {
+        transform: translateY(-2px);
+        border-color: var(--terracotta);
+        background: var(--cream-light, #fff) !important;
+      }
+      .nav__socials a:nth-child(1) { color: #25d366 !important; }
+      .nav__socials a:nth-child(2) { color: #229ed9 !important; }
+      .nav__socials a:nth-child(3) { color: #c13584 !important; }
+      .nav__socials a:nth-child(4) { color: var(--terracotta) !important; }
+      .nav__socials svg { width: 20px; height: 20px; }
     }
 
     /* ============ HERO ============ */
@@ -1813,7 +2218,8 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       border-radius: 50%;
       background: linear-gradient(135deg, rgba(196, 98, 45, 0.12), rgba(26, 107, 138, 0.1));
     }
-    .about__quote-mark .icon svg { stroke: url(#grad-terra-lemon); width: 22px; height: 22px; }
+    .about__quote-mark .icon { color: var(--terracotta); }
+    .about__quote-mark .icon svg { width: 22px; height: 22px; }
 
     .about__tagline {
       font-family: var(--font-display);
@@ -1987,9 +2393,16 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
     }
     .chip__icon svg {
       width: 16px; height: 16px;
-      stroke: var(--grad, url(#grad-azure-terra));
-      transition: stroke 0.2s;
+      transition: color 0.2s;
     }
+    .chip--terra  .chip__icon { color: var(--terracotta); }
+    .chip--azure  .chip__icon { color: var(--azure-deep); }
+    .chip--lemon  .chip__icon { color: var(--lemon); }
+    .chip--olive  .chip__icon { color: var(--olive); }
+    .chip--sky    .chip__icon { color: var(--azure-light); }
+    .chip--mute   .chip__icon { color: var(--text-mute); }
+    .chip--ink    .chip__icon { color: var(--ink); }
+    .chip--peach  .chip__icon { color: var(--terra-light); }
     .chip__text {
       display: inline-block;
       color: inherit;
@@ -2018,9 +2431,9 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       background: rgba(255, 255, 255, 0.14);
       border-color: rgba(255, 255, 255, 0.28);
     }
-    .chip--active .chip__icon svg,
-    .chip--active:hover .chip__icon svg {
-      stroke: var(--cream) !important;
+    .chip--active .chip__icon,
+    .chip--active:hover .chip__icon {
+      color: var(--cream) !important;
     }
 
     /* Horizontal scroll on mobile */
@@ -2305,6 +2718,68 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       .couch__icon-wrap { margin: 0 auto; }
     }
 
+    /* ============ REVIEWS ============ */
+    .reviews { padding: clamp(4rem, 8vw, 7rem) 0; background: var(--cream-light, #fdfbf6); }
+    .reviews__rating-summary {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+      gap: 0.75rem;
+      margin: 0.5rem auto 2.5rem;
+      font-family: 'Cormorant Infant', Georgia, serif;
+      font-size: 1.15rem;
+      color: var(--ink, #2a2a2a);
+    }
+    .reviews__stars {
+      color: var(--lemon, #d9a441);
+      letter-spacing: 0.1em;
+      font-size: 1.3rem;
+    }
+    .reviews__rating-text strong { font-size: 1.4rem; font-weight: 600; color: var(--terra, #c4622d); }
+    .reviews__sep { opacity: 0.4; }
+    .reviews__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .review {
+      background: #fff;
+      border: 1px solid rgba(196, 98, 45, 0.12);
+      border-radius: 1rem;
+      padding: 1.5rem 1.5rem 1.25rem;
+      display: flex; flex-direction: column;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+    }
+    .review:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.07); }
+    .review__head {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 0.75rem;
+      font-size: 0.85rem;
+    }
+    .review__stars { color: var(--lemon, #d9a441); letter-spacing: 0.05em; font-size: 1rem; }
+    .review__stars-empty { color: rgba(0,0,0,0.12); }
+    .review__date { color: rgba(0,0,0,0.5); font-variant-numeric: tabular-nums; }
+    .review__text {
+      font-family: 'Cormorant Infant', Georgia, serif;
+      font-size: 1.05rem;
+      line-height: 1.55;
+      color: var(--ink, #2a2a2a);
+      flex: 1;
+      margin: 0 0 1rem;
+    }
+    .review__foot {
+      display: flex; flex-direction: column; gap: 0.25rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(196, 98, 45, 0.08);
+      font-size: 0.85rem;
+    }
+    .review__author { font-weight: 600; color: var(--ink, #2a2a2a); }
+    .review__tour { color: rgba(0,0,0,0.55); font-style: italic; }
+    @media (max-width: 600px) {
+      .reviews__grid { grid-template-columns: 1fr; }
+    }
+
     /* ============ FORM ============ */
     .form-section { padding: clamp(4rem, 8vw, 7rem) 0; }
     .form-section__grid {
@@ -2407,7 +2882,8 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       width: 32px; height: 32px;
       margin-bottom: 0.3rem;
     }
-    .contact__icon svg { stroke: url(#grad-azure-terra); width: 100%; height: 100%; }
+    .contact__icon { color: var(--azure-deep); }
+    .contact__icon svg { width: 100%; height: 100%; }
     .contact__label { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-soft); }
     .contact__value { font-size: 0.95rem; color: var(--text); word-break: break-word; }
     .contact__card--whatsapp { border-color: rgba(37, 211, 102, 0.3); background: linear-gradient(135deg, var(--cream), #e8f7ec); }
@@ -2612,6 +3088,8 @@ const gradForCategory = (cat: string): string => CATEGORY_GRADIENTS[cat] || 'gra
       padding-bottom: 1.4rem;
       border-bottom: 1px solid var(--line);
     }
+    .modal__meta-item { display: inline-flex; align-items: center; gap: 0.4rem; }
+    .modal__meta-item svg { color: var(--terracotta); flex-shrink: 0; }
     .modal__long {
       color: var(--text-mute);
       line-height: 1.7;

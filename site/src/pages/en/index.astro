@@ -1,0 +1,197 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import TourCard from '../../components/TourCard.astro';
+import ReviewsList from '../../components/ReviewsList.astro';
+import FAQ from '../../components/FAQ.astro';
+import { tours, contacts, about } from '../../data/tours';
+import { aggregateRating } from '../../data/reviews';
+import { iconSvg } from '../../lib/icons';
+
+const enTours = tours.filter(t => t.lang === 'en');
+const canonical = 'https://masha.amalfi.day/en/';
+
+const businessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'TravelAgency',
+  '@id': 'https://masha.amalfi.day/#business',
+  name: 'Masha Shishkova — guide in Campania',
+  description: 'Licensed guide for Naples, Pompeii, Herculaneum, Amalfi Coast, Ravello, and Capri. Authored private tours, family quests, food walks, boat trips.',
+  url: canonical,
+  image: 'https://masha.amalfi.day/images/bg-hero.webp',
+  logo: 'https://masha.amalfi.day/apple-touch-icon.png',
+  telephone: '+79219594978',
+  email: contacts.email,
+  priceRange: '€40–€1500',
+  currenciesAccepted: 'EUR',
+  paymentAccepted: 'Cash, Bank Transfer',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Maiori',
+    addressRegion: 'Campania',
+    postalCode: '84010',
+    addressCountry: 'IT',
+  },
+  geo: { '@type': 'GeoCoordinates', latitude: 40.6510, longitude: 14.6378 },
+  areaServed: [
+    { '@type': 'City', name: 'Naples' }, { '@type': 'City', name: 'Pompeii' },
+    { '@type': 'City', name: 'Herculaneum' }, { '@type': 'City', name: 'Amalfi' },
+    { '@type': 'City', name: 'Ravello' }, { '@type': 'City', name: 'Capri' },
+    { '@type': 'City', name: 'Paestum' },
+  ],
+  hasCredential: {
+    '@type': 'EducationalOccupationalCredential',
+    credentialCategory: 'license',
+    name: 'Licenza guida turistica Regione Campania',
+    url: about.licenseUrl,
+  },
+  knowsLanguage: ['en', 'ru', 'it'],
+  sameAs: [contacts.instagram, contacts.facebook, contacts.telegram],
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: aggregateRating.ratingValue.toFixed(1),
+    reviewCount: aggregateRating.reviewCount,
+    bestRating: 5,
+    worstRating: 1,
+  },
+};
+
+const enFaq = [
+  { q: 'Do I need to pay a deposit?', a: 'No. Payment on the day, after the tour, in cash or by transfer.' },
+  { q: 'Which languages do you guide in?', a: 'English, Russian, and Italian. I\'m a licensed Regione Campania guide — languages are certified.' },
+  { q: 'Are entrance tickets included?', a: 'No, entrance tickets to Pompeii (€20), Sansevero Chapel (€12), Ravello villas (€8–10), Amalfi Cathedral (€3) are paid separately. I help with online booking.' },
+  { q: 'Are the tours kid-friendly?', a: 'Yes. There are dedicated children\'s quests in Naples and Pompeii. All routes adapt to your pace.' },
+  { q: 'How do I book?', a: 'Quickest: WhatsApp +7 921 959-49-78. Reply within a few hours. Telegram and email also work.' },
+  { q: 'Are you a licensed guide?', a: 'Yes — Regione Campania licence, registered with the Italian Ministry of Tourism. Verifiable at portaleprofessioni.ministeroturismo.gov.it.' },
+];
+---
+<Layout
+  title="Private guide for Naples, Pompeii & Amalfi · Masha Shishkova"
+  description="Licensed Regione Campania guide for Naples, Pompeii, Herculaneum, the Amalfi Coast, Ravello, and Capri. Private tours, family quests, food walks. Book on WhatsApp."
+  canonical={canonical}
+  ogImageAlt="Amalfi Coast — private tours with Masha Shishkova"
+  lang="en"
+  alternates={[
+    { hreflang: 'en', href: canonical },
+    { hreflang: 'ru', href: 'https://masha.amalfi.day/' },
+    { hreflang: 'x-default', href: 'https://masha.amalfi.day/' },
+  ]}
+  keywords="Naples private tour, Amalfi Coast guide, Pompeii private tour, Capri private boat, English speaking guide Italy, licensed guide Campania, Russian guide Italy"
+  jsonLd={[businessSchema]}
+  preloads={[{ as: 'image', href: '/images/bg-hero.webp', fetchpriority: 'high' }]}
+>
+  <section class="en-hero">
+    <div class="en-hero__bg" role="img" aria-label="Amalfi coast"></div>
+    <div class="en-hero__overlay"></div>
+    <div class="container en-hero__content">
+      <p class="kicker">Licensed guide · Regione Campania</p>
+      <h1 class="en-hero__title">Masha Shishkova</h1>
+      <p class="en-hero__tag">Authored private tours of Naples, Pompeii, the Amalfi Coast, Ravello, Capri, and Paestum. With a licence, since 2020.</p>
+      <div class="en-hero__actions">
+        <a class="btn btn--primary btn--lg" href="#tours">View tours →</a>
+        <a class="btn btn--ghost btn--lg" href={`https://wa.me/${contacts.whatsappNumber}?text=${encodeURIComponent('Hi Masha!')}`} target="_blank" rel="noopener">
+          WhatsApp
+        </a>
+      </div>
+      <a class="en-hero__license" href={about.licenseUrl} target="_blank" rel="noopener">
+        <span set:html={iconSvg('check')} />
+        <span>Verifiable Regione Campania licence ↗</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="en-section" id="tours">
+    <div class="container">
+      <p class="kicker kicker--center">Available in English</p>
+      <h2 class="section-title section-title--center">Featured tours</h2>
+      <p class="en-intro">Below are the tours fully available in English. Other tours (full Russian list) can also be guided in English on request — write me on WhatsApp.</p>
+      <div class="en-tours-grid">
+        {enTours.map(t => <TourCard tour={t} lang="en" />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="en-section" id="reviews">
+    <div class="container">
+      <p class="kicker kicker--center">Reviews</p>
+      <h2 class="section-title section-title--center">What guests say</h2>
+      <div class="en-reviews-summary">
+        <span style="color: var(--lemon); letter-spacing: 0.1em; font-size: 1.3rem;">★★★★★</span>
+        <span><strong>{aggregateRating.ratingValue.toFixed(1)}</strong> out of 5 · {aggregateRating.reviewCount} reviews</span>
+      </div>
+      <ReviewsList limit={3} lang="en" />
+    </div>
+  </section>
+
+  <section class="en-section en-section--alt">
+    <div class="container">
+      <FAQ items={enFaq} title="Frequently asked questions" />
+    </div>
+  </section>
+
+  <section class="en-section" id="contact">
+    <div class="container">
+      <h2 class="section-title section-title--center">Get in touch</h2>
+      <p class="en-intro">Tell me your dates and what you'd like to see — I'll reply within a few hours and help you plan.</p>
+      <div class="en-cta-actions">
+        <a class="btn btn--primary btn--lg" href={`https://wa.me/${contacts.whatsappNumber}?text=${encodeURIComponent('Hi Masha!')}`} target="_blank" rel="noopener">
+          <span set:html={iconSvg('message-circle')} /> <span>WhatsApp</span>
+        </a>
+        <a class="btn btn--ghost btn--lg" href={contacts.telegram} target="_blank" rel="noopener">
+          <span set:html={iconSvg('send')} /> <span>Telegram</span>
+        </a>
+        <a class="btn btn--ghost btn--lg" href={`mailto:${contacts.email}`}>
+          <span set:html={iconSvg('mail')} /> <span>Email</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .en-hero {
+    position: relative; min-height: 70vh;
+    display: flex; align-items: center;
+    color: #fff;
+    margin-top: -1px; /* hide nav border seam */
+  }
+  .en-hero__bg {
+    position: absolute; inset: 0;
+    background-image: url('/images/bg-hero.webp');
+    background-size: cover; background-position: center;
+  }
+  .en-hero__overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(13,74,94,0.65), rgba(0,0,0,0.45) 60%, rgba(0,0,0,0.2));
+  }
+  .en-hero__content { position: relative; padding: clamp(3rem, 8vw, 6rem) 0; }
+  .en-hero__content .kicker { color: #ffd9b3; }
+  .en-hero__title {
+    font-family: var(--serif); font-weight: 600;
+    font-size: clamp(2.5rem, 1.5rem + 4vw, 4.5rem);
+    margin: 0.25rem 0 1rem; line-height: 1;
+  }
+  .en-hero__tag { font-family: var(--serif); font-size: 1.2rem; max-width: 580px; opacity: 0.92; margin: 0 0 1.75rem; }
+  .en-hero__actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .en-hero__actions .btn--ghost { color: #fff; border-color: rgba(255,255,255,0.6); }
+  .en-hero__actions .btn--ghost:hover { background: rgba(255,255,255,0.15); color: #fff; }
+  .en-hero__license { display: inline-flex; align-items: center; gap: 0.4rem; color: #fff !important; font-size: 0.9rem; opacity: 0.85; }
+  .en-hero__license svg { width: 14px; height: 14px; }
+
+  .en-section { padding: clamp(3rem, 6vw, 5rem) 0; }
+  .en-section--alt { background: var(--cream-light); }
+  .en-intro { max-width: 640px; margin: 0 auto 2rem; text-align: center; color: var(--ink-soft); font-size: 1.05rem; }
+
+  .en-tours-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .en-reviews-summary {
+    text-align: center; display: flex; gap: 0.6rem; justify-content: center; align-items: center;
+    margin-bottom: 2rem; font-family: var(--serif); font-size: 1.05rem;
+  }
+  .en-reviews-summary strong { color: var(--terra); font-size: 1.4rem; }
+  .en-cta-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+  .en-cta-actions .btn svg { width: 18px; height: 18px; }
+</style>

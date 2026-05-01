@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+Disallow: /_astro/
+
+User-agent: Yandex
+Allow: /
+Disallow: /_astro/
+Host: masha.amalfi.day
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://masha.amalfi.day/sitemap-index.xml

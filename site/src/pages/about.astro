@@ -1,0 +1,178 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { about, contacts } from '../data/tours';
+import { iconSvg } from '../lib/icons';
+
+const canonical = 'https://masha.amalfi.day/about';
+
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  '@id': 'https://masha.amalfi.day/#person',
+  name: 'Маша Шишкова',
+  alternateName: ['Masha Shishkova', 'Maria Shishkova'],
+  jobTitle: 'Лицензированный гид',
+  description: 'Лицензированный гид по Кампании, специализируется на Неаполе, Помпеях и Амальфитанском побережье. Языки: русский, английский, итальянский.',
+  url: canonical,
+  image: 'https://masha.amalfi.day/images/masha.jpg',
+  knowsLanguage: ['ru', 'en', 'it'],
+  worksFor: {
+    '@type': 'TravelAgency',
+    '@id': 'https://masha.amalfi.day/#business',
+    name: 'Маша Шишкова — гид по Кампании',
+  },
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Maiori',
+    addressRegion: 'Campania',
+    addressCountry: 'IT',
+  },
+  hasCredential: [
+    {
+      '@type': 'EducationalOccupationalCredential',
+      credentialCategory: 'license',
+      name: 'Licenza guida turistica Regione Campania',
+      url: about.licenseUrl,
+    },
+    {
+      '@type': 'EducationalOccupationalCredential',
+      credentialCategory: 'degree',
+      name: 'Институт иностранных языков, Санкт-Петербург',
+    },
+    {
+      '@type': 'EducationalOccupationalCredential',
+      credentialCategory: 'certification',
+      name: 'Курсы гидов-переводчиков (итальянский), Санкт-Петербург',
+    },
+  ],
+  sameAs: [contacts.instagram, contacts.facebook, contacts.telegram],
+  telephone: contacts.phone,
+  email: contacts.email,
+};
+---
+<Layout
+  title="Маша Шишкова · лицензированный гид Regione Campania в Майори"
+  description="Маша Шишкова — лицензированный гид Regione Campania, ваш душевно-снобистский проводник по итальянскому югу. Работаю с 2020 года в Майори. Русский, английский, итальянский."
+  canonical={canonical}
+  lang="ru"
+  alternates={[
+    { hreflang: 'ru', href: canonical },
+    { hreflang: 'x-default', href: canonical },
+  ]}
+  keywords="Маша Шишкова, гид Кампания, лицензированный гид Италия, биография гида, русский гид Амальфи"
+  jsonLd={[personSchema]}
+>
+  <article class="about-page">
+    <div class="container">
+      <Breadcrumbs items={[
+        { name: 'Главная', url: 'https://masha.amalfi.day/' },
+        { name: 'Обо мне', url: canonical },
+      ]} />
+
+      <div class="about-page__head">
+        <div class="about-page__photo">
+          <img src="/images/masha.jpg" alt="Маша Шишкова — лицензированный гид по Кампании" width="1365" height="1365" />
+        </div>
+        <div class="about-page__intro">
+          <p class="kicker">Лицензированный гид · Regione Campania</p>
+          <h1>Маша Шишкова</h1>
+          <p class="about-page__tagline">Из итальянского гида в Санкт-Петербурге — в русского гида в Италии.</p>
+          <a class="btn btn--ghost" href={about.licenseUrl} target="_blank" rel="noopener">
+            <span set:html={iconSvg('scroll-text')} />
+            <span>Лицензия Regione Campania ↗</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="about-page__body">
+        <section>
+          <h2>Подход</h2>
+          <p>Ваш душевно-снобистский проводник по истории и культуре итальянского юга. Веду интеллектуальные прогулки с захватывающими подробностями, иронией и юмором. Без зубрёжки, без «по программе сейчас вот этот объект». Скорее — прогулка с подружкой, которая 10 лет копает тему и хочет рассказать про неё всё.</p>
+        </section>
+
+        <section>
+          <h2>Образование и лицензия</h2>
+          <ul>
+            <li>Институт иностранных языков, Санкт-Петербург — итальянский.</li>
+            <li>Курсы гидов-переводчиков (итальянский), Санкт-Петербург.</li>
+            <li>Лицензия гида Regione Campania — выдана Министерством туризма Италии. <a href={about.licenseUrl} target="_blank" rel="noopener">Проверить →</a></li>
+          </ul>
+          <p>Языки: русский (родной), итальянский, английский.</p>
+        </section>
+
+        <section>
+          <h2>Где работаю</h2>
+          <p>Базируюсь в Майори (Амальфитанское побережье). Провожу экскурсии по всей Кампании: Неаполь, Помпеи, Геркуланум, Везувий, Амальфи, Равелло, Капри, Пестум, Казерта, Беневенто, Капуя.</p>
+        </section>
+
+        <section>
+          <h2>Что бывает на экскурсиях</h2>
+          <ul>
+            <li><strong>Авторские маршруты</strong> — не «по списку из путеводителя», а через темы: характер города, его еда, его религия, его футбол.</li>
+            <li><strong>Квесты для детей</strong> — игровые сценарии под возраст, с заданиями.</li>
+            <li><strong>Гастротуры</strong> — уличная еда, кофе, пицца с мастер-классом.</li>
+            <li><strong>Морские прогулки</strong> — побережье с воды, купание в укромных бухтах.</li>
+            <li><strong>Многодневные туры</strong> — *Сначала были греки* (3 дня по Magna Graecia).</li>
+            <li><strong>Консультации</strong> — Zoom-звонок по планированию маршрута, помощь с жильём и трансферами.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Условия</h2>
+          <ul>
+            <li>Без предоплаты. Оплата на месте после экскурсии.</li>
+            <li>Маршрут адаптируется под темп, интересы, погоду, время года.</li>
+            <li>Языки экскурсии: русский, английский, итальянский.</li>
+            <li>Группы — обычно до 4 человек, дополнительные — €20–30/чел.</li>
+          </ul>
+        </section>
+
+        <section class="about-page__cta">
+          <h2 class="section-title section-title--center">Связаться</h2>
+          <p>Самый быстрый способ — WhatsApp. Ответ в течение нескольких часов.</p>
+          <div class="about-page__cta-actions">
+            <a class="btn btn--primary btn--lg" href={`https://wa.me/${contacts.whatsappNumber}?text=${encodeURIComponent('Здравствуйте, Маша!')}`} target="_blank" rel="noopener">
+              <span set:html={iconSvg('message-circle')} /> <span>WhatsApp</span>
+            </a>
+            <a class="btn btn--ghost btn--lg" href={contacts.telegram} target="_blank" rel="noopener">
+              <span set:html={iconSvg('send')} /> <span>Telegram</span>
+            </a>
+            <a class="btn btn--ghost btn--lg" href={`mailto:${contacts.email}`}>
+              <span set:html={iconSvg('mail')} /> <span>Email</span>
+            </a>
+          </div>
+        </section>
+      </div>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .about-page { padding: 0 0 4rem; }
+  .about-page__head {
+    display: grid; grid-template-columns: 280px 1fr; gap: 2.5rem; align-items: center;
+    margin: 1rem 0 3rem;
+  }
+  .about-page__photo { border-radius: 1rem; overflow: hidden; aspect-ratio: 1; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+  .about-page__photo img { width: 100%; height: 100%; object-fit: cover; }
+  .about-page__intro h1 { font-family: var(--serif); font-size: clamp(2rem, 1.5rem + 2vw, 3rem); margin: 0.25rem 0 0.75rem; line-height: 1.05; }
+  .about-page__tagline { font-family: var(--serif); font-style: italic; font-size: 1.2rem; color: var(--ink-soft); margin: 0 0 1.5rem; }
+  .about-page__intro .btn svg { width: 16px; height: 16px; }
+
+  .about-page__body { max-width: 760px; margin: 0 auto; }
+  .about-page__body section { margin-bottom: 2.5rem; }
+  .about-page__body h2 { font-family: var(--serif); font-size: 1.6rem; margin: 0 0 0.75rem; color: var(--terra); }
+  .about-page__body p { font-family: var(--serif); font-size: 1.1rem; line-height: 1.6; }
+  .about-page__body ul { padding-left: 1.5rem; }
+  .about-page__body li { margin-bottom: 0.5rem; line-height: 1.5; }
+
+  .about-page__cta { text-align: center; padding: 3rem 1.5rem; background: var(--cream-light); border: 1px solid var(--line); border-radius: 1rem; }
+  .about-page__cta-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem; }
+  .about-page__cta-actions .btn svg { width: 18px; height: 18px; }
+
+  @media (max-width: 700px) {
+    .about-page__head { grid-template-columns: 1fr; gap: 1.5rem; text-align: center; }
+    .about-page__photo { max-width: 280px; margin: 0 auto; }
+  }
+</style>

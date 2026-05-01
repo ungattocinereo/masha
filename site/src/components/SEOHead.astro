@@ -1,0 +1,108 @@
+---
+/**
+ * Reusable head meta block. Emits title, description, canonical, robots, hreflang,
+ * favicon, manifest, theme, OG, Twitter, keywords. Page-specific JSON-LD goes in
+ * the default slot.
+ */
+import type { JSONLDSchema } from '../lib/types';
+
+export interface Alternate {
+  hreflang: 'ru' | 'en' | 'x-default';
+  href: string;
+}
+
+interface Props {
+  title: string;
+  description: string;
+  /** Absolute canonical URL, e.g. "https://masha.amalfi.day/tours/pompeii-deep" */
+  canonical: string;
+  /** Absolute OG image URL. Defaults to the hero image. */
+  ogImage?: string;
+  ogImageAlt?: string;
+  /** Optional override of og:type — default 'website'. Use 'article' for blog. */
+  ogType?: string;
+  lang?: 'ru' | 'en';
+  alternates?: Alternate[];
+  /** Comma-separated keywords list (Yandex still uses these). */
+  keywords?: string;
+  /** Extra preload hints (images, fonts). */
+  preloads?: Array<{ rel?: string; as: string; href: string; type?: string; fetchpriority?: 'high' | 'low' | 'auto'; crossorigin?: boolean }>;
+}
+
+const {
+  title,
+  description,
+  canonical,
+  ogImage = 'https://masha.amalfi.day/images/bg-hero.webp',
+  ogImageAlt = 'Амальфитанское побережье — экскурсии с Машей Шишковой',
+  ogType = 'website',
+  lang = 'ru',
+  alternates = [],
+  keywords,
+  preloads = [],
+} = Astro.props;
+
+const ogLocale = lang === 'en' ? 'en_US' : 'ru_RU';
+const ogLocaleAlt = lang === 'en' ? 'ru_RU' : 'en_US';
+---
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+
+{alternates.map(a => (
+  <link rel="alternate" hreflang={a.hreflang} href={a.href} />
+))}
+
+<!-- Search engine verifications: replace placeholders when registered -->
+<meta name="yandex-verification" content="REPLACE_WITH_YANDEX_TOKEN" />
+<meta name="google-site-verification" content="REPLACE_WITH_GSC_TOKEN" />
+
+<!-- Favicon & PWA -->
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="alternate icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+<link rel="manifest" href="/manifest.webmanifest" />
+
+<!-- Theme & mobile -->
+<meta name="theme-color" content="#1a6b8a" />
+<meta name="msapplication-TileColor" content="#1a6b8a" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+<!-- Page-specific preloads -->
+{preloads.map(p => (
+  <link
+    rel={p.rel ?? 'preload'}
+    as={p.as}
+    href={p.href}
+    {...(p.type ? { type: p.type } : {})}
+    {...(p.fetchpriority ? { fetchpriority: p.fetchpriority } : {})}
+    {...(p.crossorigin ? { crossorigin: '' } : {})}
+  />
+))}
+
+<!-- Open Graph -->
+<meta property="og:type" content={ogType} />
+<meta property="og:url" content={canonical} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:alt" content={ogImageAlt} />
+<meta property="og:locale" content={ogLocale} />
+<meta property="og:locale:alternate" content={ogLocaleAlt} />
+<meta property="og:site_name" content="Маша Шишкова — гид по Кампании" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+<meta name="twitter:image:alt" content={ogImageAlt} />
+
+{keywords && <meta name="keywords" content={keywords} />}
+
+<slot />

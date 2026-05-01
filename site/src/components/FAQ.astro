@@ -1,0 +1,71 @@
+---
+/** FAQ accordion + FAQPage JSON-LD. */
+interface QA { q: string; a: string; }
+interface Props {
+  items: QA[];
+  /** Section heading (default: "Частые вопросы"). */
+  title?: string;
+  /** Set false to skip JSON-LD if another FAQ block on the page already emits it. */
+  emitSchema?: boolean;
+}
+const { items, title = 'Частые вопросы', emitSchema = true } = Astro.props;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: items.map(i => ({
+    '@type': 'Question',
+    name: i.q,
+    acceptedAnswer: { '@type': 'Answer', text: i.a },
+  })),
+};
+---
+<section class="faq">
+  <h2 class="section-title">{title}</h2>
+  <div class="faq__list">
+    {items.map(i => (
+      <details class="faq__item">
+        <summary>
+          <span>{i.q}</span>
+          <span class="faq__icon" aria-hidden="true">+</span>
+        </summary>
+        <p>{i.a}</p>
+      </details>
+    ))}
+  </div>
+</section>
+
+{emitSchema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
+
+<style>
+  .faq { margin: 3rem 0; }
+  .faq__list { display: flex; flex-direction: column; gap: 0.5rem; }
+  .faq__item {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    padding: 0;
+    overflow: hidden;
+    transition: box-shadow 0.2s var(--ease);
+  }
+  .faq__item[open] { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .faq__item summary {
+    cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem 1.25rem;
+    font-weight: 500;
+    list-style: none;
+  }
+  .faq__item summary::-webkit-details-marker { display: none; }
+  .faq__icon {
+    color: var(--terra);
+    font-size: 1.4rem; line-height: 1;
+    transition: transform 0.2s var(--ease);
+  }
+  .faq__item[open] .faq__icon { transform: rotate(45deg); }
+  .faq__item p {
+    margin: 0; padding: 0 1.25rem 1.25rem;
+    color: var(--ink-soft);
+    font-family: var(--serif); font-size: 1.05rem; line-height: 1.55;
+  }
+</style>

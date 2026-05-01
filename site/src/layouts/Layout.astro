@@ -1,0 +1,214 @@
+---
+/**
+ * Shared layout for all pages except the home (which keeps its monolithic page for now
+ * to avoid disrupting the modal/i18n JS).
+ *
+ * Provides: SEO head, fonts, GA, Yandex.Metrika, top nav, footer.
+ * Pages plug their content into the default slot.
+ */
+import SEOHead, { type Alternate } from '../components/SEOHead.astro';
+import Nav from '../components/Nav.astro';
+import { iconSvg } from '../lib/icons';
+import { contacts, about } from '../data/tours';
+
+interface Props {
+  title: string;
+  description: string;
+  canonical: string;
+  ogImage?: string;
+  ogImageAlt?: string;
+  ogType?: string;
+  lang?: 'ru' | 'en';
+  alternates?: Alternate[];
+  keywords?: string;
+  /** Per-page JSON-LD blocks; emitted as separate <script type="application/ld+json"> tags. */
+  jsonLd?: Array<Record<string, unknown>>;
+  /** Optional preload hints (e.g. hero image for LCP). */
+  preloads?: Array<{ as: string; href: string; type?: string; fetchpriority?: 'high' | 'low' | 'auto'; crossorigin?: boolean }>;
+}
+
+const {
+  title,
+  description,
+  canonical,
+  ogImage,
+  ogImageAlt,
+  ogType,
+  lang = 'ru',
+  alternates,
+  keywords,
+  jsonLd = [],
+  preloads,
+} = Astro.props;
+
+const t = (ru: string, en: string) => lang === 'en' ? en : ru;
+---
+<!DOCTYPE html>
+<html lang={lang} data-lang={lang}>
+<head>
+  <SEOHead
+    title={title}
+    description={description}
+    canonical={canonical}
+    ogImage={ogImage}
+    ogImageAlt={ogImageAlt}
+    ogType={ogType}
+    lang={lang}
+    alternates={alternates}
+    keywords={keywords}
+    preloads={preloads}
+  />
+
+  {jsonLd.map(schema => (
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  ))}
+
+  <!-- Yandex.Metrika counter — TODO(seo): replace XXXXXXXX with real counter ID -->
+  <script is:inline>
+    (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+    m[i].l=1*new Date();
+    for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+    k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+    (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+    // ym(XXXXXXXX, "init", { clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true });
+  </script>
+  <noscript><div><img src="https://mc.yandex.ru/watch/XXXXXXXX" style="position:absolute;left:-9999px;" alt="" /></div></noscript>
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2B105VCL69"></script>
+  <script is:inline>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-2B105VCL69');
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Infant:wght@400;500;600;700&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <Nav lang={lang} />
+
+  <main class="page">
+    <slot />
+  </main>
+
+  <footer class="footer-lite">
+    <div class="container">
+      <div class="footer-lite__row">
+        <div>
+          <p class="footer-lite__name">Маша Шишкова</p>
+          <p class="footer-lite__tag">{t('Лицензированный гид · Regione Campania', 'Licensed guide · Regione Campania')}</p>
+        </div>
+        <div class="footer-lite__contacts">
+          <a href={`https://wa.me/${contacts.whatsappNumber}`} target="_blank" rel="noopener" aria-label="WhatsApp" set:html={iconSvg('message-circle')} />
+          <a href={contacts.telegram} target="_blank" rel="noopener" aria-label="Telegram" set:html={iconSvg('send')} />
+          <a href={contacts.instagram} target="_blank" rel="noopener" aria-label="Instagram" set:html={iconSvg('instagram')} />
+          <a href={`mailto:${contacts.email}`} aria-label="Email" set:html={iconSvg('mail')} />
+        </div>
+      </div>
+      <div class="footer-lite__bottom">
+        <p>© 2024–2026 Маша Шишкова. {t('Все права защищены.', 'All rights reserved.')}</p>
+        <a href={about.licenseUrl} target="_blank" rel="noopener">Licenza Regione Campania ↗</a>
+      </div>
+    </div>
+  </footer>
+
+  <style is:global>
+    :root {
+      --terra: #c4622d;
+      --terra-light: #d9794a;
+      --azure: #1a6b8a;
+      --azure-deep: #0d4a5e;
+      --azure-light: #2b8fad;
+      --lemon: #d9a441;
+      --olive: #6b7c3e;
+      --text-mute: #6b5d4a;
+      --cream: #fdfbf6;
+      --cream-light: #fff;
+      --ink: #1f2024;
+      --ink-soft: #4a4a4a;
+      --line: rgba(0,0,0,0.08);
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+      --serif: 'Cormorant Infant', Georgia, serif;
+      --sans: 'Golos Text', system-ui, -apple-system, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      color: var(--ink);
+      background: var(--cream);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--azure); text-decoration: none; }
+    a:hover { color: var(--terra); }
+    img { max-width: 100%; height: auto; display: block; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2rem); }
+
+    /* Push content below the fixed shared Nav */
+    .page { min-height: 60vh; padding-top: 64px; }
+    @media (max-width: 900px) { .page { padding-top: 60px; } }
+
+    /* Lite footer */
+    .footer-lite {
+      background: linear-gradient(135deg, var(--azure-deep), var(--azure));
+      color: #fff; padding: 2.5rem 0 1.5rem; margin-top: 4rem;
+    }
+    .footer-lite__row {
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+      gap: 1.5rem; margin-bottom: 1.5rem;
+    }
+    .footer-lite__name { font-family: var(--serif); font-size: 1.3rem; margin: 0 0 0.2rem; }
+    .footer-lite__tag { margin: 0; opacity: 0.85; font-size: 0.9rem; }
+    .footer-lite__contacts {
+      display: flex; gap: 0.75rem;
+    }
+    .footer-lite__contacts a {
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 50%;
+      display: grid; place-items: center;
+      color: #fff !important;
+      transition: background 0.2s var(--ease), transform 0.2s var(--ease);
+    }
+    .footer-lite__contacts a:hover { background: rgba(255,255,255,0.22); transform: translateY(-2px); }
+    .footer-lite__contacts svg { width: 18px; height: 18px; }
+    .footer-lite__bottom {
+      display: flex; flex-wrap: wrap; justify-content: space-between;
+      gap: 0.5rem;
+      padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.15);
+      font-size: 0.85rem; opacity: 0.85;
+    }
+    .footer-lite__bottom a { color: #fff; opacity: 0.85; }
+    .footer-lite__bottom a:hover { opacity: 1; color: #fff; }
+
+    /* Section primitives shared across pages */
+    .kicker { font-family: var(--serif); font-style: italic; color: var(--terra); font-size: 1rem; margin: 0 0 0.5rem; letter-spacing: 0.02em; }
+    .kicker--center { text-align: center; }
+    .section-title { font-family: var(--serif); font-weight: 600; font-size: clamp(1.8rem, 1.4rem + 1.6vw, 2.7rem); margin: 0 0 1.5rem; line-height: 1.15; }
+    .section-title--center { text-align: center; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.7rem 1.4rem; border-radius: 999px;
+      font-family: var(--sans); font-weight: 500; font-size: 0.95rem;
+      border: none; cursor: pointer; text-decoration: none;
+      transition: transform 0.2s var(--ease), background 0.2s var(--ease), box-shadow 0.2s var(--ease);
+    }
+    .btn--primary { background: var(--terra); color: #fff; }
+    .btn--primary:hover { background: #a35323; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(196,98,45,0.35); }
+    .btn--ghost { background: transparent; color: var(--azure); border: 1.5px solid var(--azure); }
+    .btn--ghost:hover { background: var(--azure); color: #fff; }
+    .btn--lg { padding: 0.95rem 1.8rem; font-size: 1rem; }
+    .btn--full { width: 100%; justify-content: center; }
+  </style>
+</body>
+</html>

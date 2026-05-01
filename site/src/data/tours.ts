@@ -1,43 +1,56 @@
 export interface Tour {
   id: string;
+  /** Stable URL slug (used for /tours/[slug]). Defaults to id when omitted. */
+  slug?: string;
   category: string;
   /** Additional categories under which the tour should also appear (e.g. quest-maradona in 'naples') */
   extraCategories?: string[];
   title: string;
+  /** English equivalent of the title — used when this RU tour is referenced from EN UI (e.g. reviews shown on /en/). */
+  enTitle?: string;
   subtitle: string;
   duration: string;
   price: string;
+  /** Numeric base price in EUR for schema.org Offer. */
+  priceEUR?: number;
   maxPeople?: string;
   description: string;
   longDescription?: string;
   details?: string[];
   extras?: string;
   image: string;
+  /** Descriptive alt text — location + content + brand. Falls back to title when omitted. */
+  imageAlt?: string;
   externalUrl?: string;
   lang?: 'ru' | 'en';
+  /** Per-page SEO override for /tours/[slug] (Phase 2). */
+  seoTitle?: string;
+  seoDescription?: string;
+  /** Tour-specific FAQ entries used in /tours/[slug] page schema (Phase 2). */
+  faq?: Array<{ q: string; a: string }>;
+  /** Long-tail keywords this tour should target. */
+  keywords?: string[];
 }
 
 export interface Category {
   id: string;
   name: string;
-  /** Lucide icon name */
+  /** Icon registry name (resolved to a Font Awesome SVG via lib/icons.ts) */
   icon: string;
-  /** Optional — legacy field for v1/v2 pages */
-  emoji?: string;
 }
 
 const img = (id: string, w = 800, h = 600) =>
   `https://images.unsplash.com/photo-${id}?w=${w}&h=${h}&fit=crop&auto=format&q=80`;
 
 export const categories: Category[] = [
-  { id: 'naples',  name: 'Неаполь',                    icon: 'mountain',    emoji: '🌋' },
-  { id: 'pompeii', name: 'Помпеи и Геркуланум',        icon: 'castle',      emoji: '🏛️' },
-  { id: 'amalfi',  name: 'Амальфитанское побережье',   icon: 'waves',       emoji: '🍋' },
-  { id: 'quests',  name: 'Квесты',                     icon: 'puzzle',      emoji: '🧩' },
-  { id: 'sea',     name: 'Морские прогулки',           icon: 'sailboat',    emoji: '⛵' },
-  { id: 'multi',   name: 'Многодневные туры',          icon: 'compass',     emoji: '🗺️' },
-  { id: 'couch',   name: 'Экскурсии на диване',        icon: 'play-circle', emoji: '🎬' },
-  { id: 'extra',   name: 'Дополнительные услуги',      icon: 'sparkles',    emoji: '✨' },
+  { id: 'naples',  name: 'Неаполь',                    icon: 'mountain'    },
+  { id: 'pompeii', name: 'Помпеи и Геркуланум',        icon: 'castle'      },
+  { id: 'amalfi',  name: 'Амальфитанское побережье',   icon: 'waves'       },
+  { id: 'quests',  name: 'Квесты',                     icon: 'puzzle'      },
+  { id: 'sea',     name: 'Морские прогулки',           icon: 'sailboat'    },
+  { id: 'multi',   name: 'Многодневные туры',          icon: 'compass'     },
+  { id: 'couch',   name: 'Экскурсии на диване',        icon: 'play-circle' },
+  { id: 'extra',   name: 'Дополнительные услуги',      icon: 'sparkles'    },
 ];
 
 export const tours: Tour[] = [
@@ -46,6 +59,7 @@ export const tours: Tour[] = [
     id: 'naples-character',
     category: 'naples',
     title: 'Неаполитанский характер',
+    enTitle: 'The Neapolitan Character',
     subtitle: 'Sacra e profana — прогулка с погружением',
     duration: '3 часа',
     price: '€270',
@@ -69,6 +83,9 @@ export const tours: Tour[] = [
 
 Неаполитанцы говорят: «Это неправда, но я в это верю». На всякий случай. Чего и вам советуют.`,
     image: '/images/tours/naples-character.webp',
+    imageAlt: 'Исторический центр Неаполя — экскурсия о суевериях, святых и неаполитанском характере с гидом Машей Шишковой',
+    priceEUR: 270,
+    keywords: ['гид Неаполь', 'неаполитанский характер', 'экскурсия исторический центр Неаполя', 'святые Неаполя'],
   },
   {
     id: 'naples-sansevero',
@@ -89,6 +106,9 @@ export const tours: Tour[] = [
 • Ближайшие к капелле дома и их средневековые тайны.`,
     extras: 'Входной билет — €12/чел. (надо покупать заранее)',
     image: '/images/tours/naples-sansevero.webp',
+    imageAlt: 'Капелла Сан Северо в Неаполе — масонские символы и Христос под плащаницей Санмартино',
+    priceEUR: 220,
+    keywords: ['Капелла Сан Северо', 'Христос под плащаницей', 'князья де Сангро', 'масоны Неаполь'],
   },
   {
     id: 'naples-football',
@@ -112,11 +132,15 @@ export const tours: Tour[] = [
 
 Еда и напитки оплачиваются отдельно.`,
     image: '/images/tours/naples-football.webp',
+    imageAlt: 'Народный алтарь Марадоны в Испанских кварталах Неаполя — футбольная экскурсия',
+    priceEUR: 270,
+    keywords: ['футбольная экскурсия Неаполь', 'Марадона Неаполь', 'алтарь Марадоны', 'Испанские кварталы'],
   },
   {
     id: 'naples-gastro',
     category: 'naples',
     title: 'Неаполь на вкус',
+    enTitle: 'A Taste of Naples',
     subtitle: 'Гастротур по Неаполю',
     duration: '3–5,5 часов',
     price: '€270–350',
@@ -137,6 +161,9 @@ export const tours: Tour[] = [
 
 Пицца: приготовление самому себе с напитком ≈ €25/чел., без готовки — €10–12.`,
     image: '/images/tours/naples-gastro.webp',
+    imageAlt: 'Гастротур по Неаполю — уличная еда, кофе, пицца, дегустация неаполитанского фастфуда с гидом',
+    priceEUR: 270,
+    keywords: ['гастротур Неаполь', 'еда Неаполь', 'неаполитанская пицца с гидом', 'мастер-класс пицца Неаполь'],
   },
   {
     id: 'naples-museum',
@@ -163,6 +190,9 @@ export const tours: Tour[] = [
 Дополнительный час — €50.`,
     extras: 'Входной билет — €20/чел. (льготный €2, дети бесплатно)',
     image: '/images/tours/naples-museum.webp',
+    imageAlt: 'Археологический музей Неаполя — фрески и мозаики из Помпей с экскурсией',
+    priceEUR: 220,
+    keywords: ['Археологический музей Неаполь экскурсия', 'фрески Помпей', 'мозаики Геркуланум'],
   },
   {
     id: 'naples-overview',
@@ -189,6 +219,9 @@ export const tours: Tour[] = [
 
 **Варианты:** 3 часа — €270, 5,5 часа — €350, from dawn till dusk (9 часов) — €450.`,
     image: '/images/tours/naples-overview.webp',
+    imageAlt: 'Обзорная экскурсия по Неаполю — замки, барокко, Испанские кварталы с лицензированным гидом',
+    priceEUR: 270,
+    keywords: ['обзорная экскурсия Неаполь', 'Неаполь за день', 'что посмотреть в Неаполе'],
   },
   {
     id: 'naples-shadow',
@@ -212,6 +245,9 @@ export const tours: Tour[] = [
 
 Можно продлить до 4 часов и совместить с экскурсией в Капеллу Сан Северо (билеты надо заказывать заранее).`,
     image: '/images/tours/naples-shadow.webp',
+    imageAlt: 'Тенистые улочки исторического центра Неаполя — экскурсия в жару с гидом',
+    priceEUR: 270,
+    keywords: ['Неаполь летом', 'экскурсия Неаполь в жару', 'Спакканаполи', 'Сан Грегорио Армено'],
   },
 
   // ============== ПОМПЕИ И ГЕРКУЛАНУМ ==============
@@ -230,9 +266,13 @@ export const tours: Tour[] = [
 • Театр, баня, цирк, храмы, бордели, спортклубы — всё как у людей.`,
     extras: 'Входной билет — €20/чел. (льготный €2, дети бесплатно)',
     image: '/images/tours/pompeii-first.webp',
+    imageAlt: 'Раскопки Помпей — обзорная экскурсия по городу 79 года с лицензированным гидом',
+    priceEUR: 270,
+    keywords: ['экскурсия Помпеи', 'Помпеи с гидом', 'экскурсия Помпеи на русском', 'Помпеи 3 часа'],
   },
   {
     id: 'pompeii-first-en',
+    slug: 'pompeii-first',
     category: 'pompeii',
     title: 'The most alive of the dead cities',
     subtitle: 'Pompeii tour for first-timers',
@@ -246,12 +286,16 @@ export const tours: Tour[] = [
 • Theatre, baths, circus, temples, brothels, sports clubs — just like real people.`,
     extras: 'Entrance ticket €20/person (reduced €2, kids free)',
     image: '/images/tours/pompeii-first.webp',
+    imageAlt: 'Pompeii archaeological park — first-timer guided tour of the Roman city frozen in 79 AD',
+    priceEUR: 270,
+    keywords: ['Pompeii private tour', 'Pompeii guided tour Russian', 'Pompeii first-timer', 'Pompeii 3 hours'],
     lang: 'en',
   },
   {
     id: 'pompeii-deep',
     category: 'pompeii',
     title: 'Вперёд в прошлое',
+    enTitle: 'Forward into the Past',
     subtitle: 'Древнеримское приключение с погружением',
     duration: '5 часов',
     price: '€350',
@@ -270,6 +314,9 @@ export const tours: Tour[] = [
 Экскурсия входит в трёхдневный тур «Сначала были греки». Также можно совместить с походом в Археологический музей Неаполя, экскурсией в Геркуланум, туром по виллам.`,
     extras: 'Входной билет — €20/чел., обед оплачивается отдельно',
     image: '/images/tours/pompeii-deep.webp',
+    imageAlt: 'Помпеи с погружением — древнеримская таверна и фрески, экскурсия на 5 часов',
+    priceEUR: 350,
+    keywords: ['Помпеи с погружением', 'древнеримская кухня Помпеи', 'Помпеи 5 часов', 'каупона Ветуция Плацида'],
   },
   {
     id: 'herculaneum',
@@ -287,6 +334,9 @@ export const tours: Tour[] = [
 • 3 часа — €270, 2 часа — €210. До 4 человек (+€20/чел., макс. 9).`,
     extras: 'Входной билет оплачивается отдельно',
     image: '/images/tours/herculaneum.webp',
+    imageAlt: 'Раскопки Геркуланума под слоем пепла — экскурсия с лицензированным гидом',
+    priceEUR: 270,
+    keywords: ['экскурсия Геркуланум', 'Геркуланум с гидом', 'Геркуланум или Помпеи'],
   },
   {
     id: 'villas',
@@ -309,6 +359,9 @@ export const tours: Tour[] = [
 
 Для передвижения между виллами может понадобиться трансфер (зависит от маршрута). От €200. Если смотрим всё — предусмотрен обед, оплачивается отдельно.`,
     image: '/images/tours/villas.webp',
+    imageAlt: 'Древнеримские виллы Кампании — Ариадны, Сан Марко, Поппеи, Реджина с гидом',
+    priceEUR: 200,
+    keywords: ['виллы Кампании', 'вилла Поппеи', 'вилла Ариадны', 'Оплонтис', 'вилла Реджина'],
   },
   {
     id: 'vesuvius',
@@ -321,6 +374,9 @@ export const tours: Tour[] = [
     description: 'Подъём к кратеру действующего вулкана с видами на Неаполитанский залив. Отлично сочетается с экскурсией в Помпеи или Геркуланум.',
     longDescription: `Везувий может быть добавлен к любому маршруту по Кампании. Подробности — обсудим индивидуально.`,
     image: '/images/tours/vesuvius.webp',
+    imageAlt: 'Кратер вулкана Везувий — восхождение с гидом, виды на Неаполитанский залив',
+    priceEUR: 270,
+    keywords: ['восхождение Везувий', 'Везувий с гидом', 'вулкан Везувий экскурсия'],
   },
 
   // ============== АМАЛЬФИТАНСКОЕ ПОБЕРЕЖЬЕ ==============
@@ -338,6 +394,9 @@ export const tours: Tour[] = [
 Я обещаю вам Райский дворик и классический маршрут — площадь, Собор Андрея Первозванного, панорама, вертеп, — чтобы составить своё мнение.`,
     extras: 'Входной билет в Собор — €3/чел.',
     image: '/images/tours/amalfi-blitz.webp',
+    imageAlt: 'Амальфи — Собор Андрея Первозванного и Райский дворик, блиц-экскурсия с гидом',
+    priceEUR: 220,
+    keywords: ['гид Амальфи', 'экскурсия Амальфи 2 часа', 'Собор Амальфи', 'Райский дворик Амальфи'],
   },
   {
     id: 'amalfi-cocktail',
@@ -354,6 +413,9 @@ export const tours: Tour[] = [
 
 Можно продлить на час для посещения музея бумаги (экскурсия под перевод). Дополнительно оплачиваются входные билеты.`,
     image: '/images/tours/amalfi-cocktail.webp',
+    imageAlt: 'Амальфитанское побережье — экскурсия с гидом по морской республике и курорту',
+    priceEUR: 270,
+    keywords: ['экскурсия Амальфи', 'Амальфитанское побережье с гидом', 'история Амальфи'],
   },
   {
     id: 'ravello-blitz',
@@ -367,6 +429,9 @@ export const tours: Tour[] = [
     longDescription: `Виды, которые сводили с ума поэтов, композиторов и миллионеров. Разноцветная керамика. Вилла Руфоло. Немного истории и историй по ходу прогулки.`,
     extras: 'Входные билеты: Собор €3, Вилла €8/чел.',
     image: '/images/tours/ravello-blitz.webp',
+    imageAlt: 'Равелло — вилла Руфоло и виды на Салернитанский залив, блиц-экскурсия 2 часа',
+    priceEUR: 220,
+    keywords: ['гид Равелло', 'вилла Руфоло', 'экскурсия Равелло'],
   },
   {
     id: 'ravello-full',
@@ -383,11 +448,15 @@ export const tours: Tour[] = [
 Коктейль на террасе пятизвёздочного отеля с видом на море или на лужайке виллы Чимброне — по желанию.`,
     extras: 'Входные билеты: Собор €3, Чимброне €10, Руфоло €8/чел.',
     image: '/images/tours/ravello-full.webp',
+    imageAlt: 'Равелло — вилла Чимброне и Терраса Бесконечности, экскурсия 4 часа с гидом',
+    priceEUR: 320,
+    keywords: ['вилла Чимброне', 'Терраса Бесконечности', 'Равелло вилла Руфоло', 'экскурсия Равелло 4 часа'],
   },
   {
     id: 'amalfi-ravello-day',
     category: 'amalfi',
     title: 'Вкус дольче виты',
+    enTitle: 'A Taste of Dolce Vita',
     subtitle: 'Амальфи + Равелло — целый день с обедом',
     duration: '8 часов',
     price: '€450',
@@ -400,6 +469,9 @@ export const tours: Tour[] = [
 
 Отдельно оплачиваются входные билеты на виллы, в собор, еда и напитки.`,
     image: '/images/tours/amalfi-ravello-day.webp',
+    imageAlt: 'Амальфи и Равелло за один день — кондитерская Pansa, обед с видом на залив, экскурсия с гидом',
+    priceEUR: 450,
+    keywords: ['Амальфи и Равелло за день', 'тур Амальфитанское побережье', 'кондитерская Pansa', 'дольче вита Амальфи'],
   },
   {
     id: 'mozzarella',
@@ -415,6 +487,9 @@ export const tours: Tour[] = [
 
 Мастер-класс можно совместить с любой экскурсией по Равелло.`,
     image: '/images/tours/mozzarella.webp',
+    imageAlt: 'Мастер-класс по моцарелле в Равелло — приготовление и дегустация местных продуктов',
+    priceEUR: 150,
+    keywords: ['мастер-класс моцарелла', 'моцарелла Амальфи', 'дегустация Равелло', 'кулинарный класс Италия'],
   },
 
   // ============== МОРСКИЕ ПРОГУЛКИ ==============
@@ -436,6 +511,9 @@ export const tours: Tour[] = [
 
 Цена по запросу (зависит от количества человек и типа яхты), от €900 за 4 часа.`,
     image: '/images/tours/yacht.webp',
+    imageAlt: 'Яхта на Амальфитанском побережье — морская прогулка с купанием и просекко',
+    priceEUR: 900,
+    keywords: ['аренда яхты Амальфи', 'морская прогулка Амальфи', 'Изумрудный грот', 'яхта Капри'],
   },
 
   // ============== КВЕСТЫ ==============
@@ -452,18 +530,25 @@ export const tours: Tour[] = [
 
 Стоимость дополнительно обсуждается — зависит от возраста и количества детей.`,
     image: '/images/tours/quest-maradona.webp',
+    imageAlt: 'Квест «Голы Марадоны» в Неаполе — игровая экскурсия для детей с заданиями',
+    priceEUR: 270,
+    keywords: ['квест Неаполь дети', 'квест Марадона', 'детская экскурсия Неаполь', 'Неаполь с детьми'],
   },
   {
     id: 'quest-pompeii',
     category: 'quests',
     extraCategories: ['pompeii'],
     title: 'Квест по Помпеям',
+    enTitle: 'Pompeii Kids Quest',
     subtitle: 'Для любознательных детей',
     duration: '3 часа',
     price: 'от €270',
     description: 'Игровой маршрут по древнему городу — детектив, загадки и настоящая археология для юных исследователей.',
     longDescription: `Квест по Помпеям для детей. Детали маршрута и заданий подбираются под возраст участников. Точная стоимость — по запросу.`,
     image: '/images/tours/quest-pompeii.webp',
+    imageAlt: 'Квест по Помпеям для детей — игровой маршрут с загадками и археологией',
+    priceEUR: 270,
+    keywords: ['квест Помпеи дети', 'детский квест Помпеи', 'Помпеи для детей', 'археологический квест'],
   },
   {
     id: 'quest-custom',
@@ -476,6 +561,9 @@ export const tours: Tour[] = [
     description: 'Пишем сценарий под ваших участников — возраст, интересы, место, длительность. Любой город Кампании.',
     longDescription: `Разрабатываем квест под ваш запрос и аудиторию. Возраст, интересы, место, длительность — обсуждаем индивидуально.`,
     image: '/images/tours/quest-custom.webp',
+    imageAlt: 'Индивидуальный квест в Кампании — разработка сценария под возраст и интересы',
+    priceEUR: 270,
+    keywords: ['индивидуальный квест Италия', 'квест на заказ Кампания', 'детская программа Италия'],
   },
 
   // ============== МНОГОДНЕВНЫЕ ТУРЫ ==============
@@ -483,6 +571,7 @@ export const tours: Tour[] = [
     id: 'greek-tour',
     category: 'multi',
     title: 'Сначала были греки',
+    enTitle: 'First Came the Greeks',
     subtitle: 'Трёхдневный археологический экспириенс',
     duration: '3 дня',
     price: '€1500',
@@ -502,6 +591,9 @@ export const tours: Tour[] = [
 
 Или на собственном автомобиле, или трансфер (от €300/день, зависит от участников и места проживания).`,
     image: '/images/tours/greek-tour.webp',
+    imageAlt: 'Трёхдневный тур по Кампании — Пестум, Неаполь, Помпеи, виллы с гидом',
+    priceEUR: 1500,
+    keywords: ['тур Кампания', 'Пестум экскурсия', 'трёхдневный тур Италия', 'Великая Греция', 'Magna Graecia'],
   },
 
   // ============== ЭКСКУРСИИ НА ДИВАНЕ ==============
@@ -516,6 +608,9 @@ export const tours: Tour[] = [
     longDescription: `Видеоэкскурсии публикуются в Telegram-канале @amalfitanskiekanikuly — каждая серия посвящена отдельному месту или сюжету с Амальфитанского побережья, из Неаполя и Помпей.`,
     externalUrl: 'https://t.me/amalfitanskiekanikuly/1876',
     image: '/images/tours/couch-amalfi.webp',
+    imageAlt: 'Видео-экскурсии по Амальфитанскому побережью — Telegram-канал Маши',
+    priceEUR: 0,
+    keywords: ['видео экскурсия Амальфи', 'виртуальный тур Италия', 'Telegram гид Амальфи'],
   },
 
   // ============== ДОПОЛНИТЕЛЬНЫЕ УСЛУГИ ==============
@@ -535,6 +630,9 @@ export const tours: Tour[] = [
 
 Больше идей и вдохновения — [в Instagram @masha_italianskii_cocktail](https://www.instagram.com/masha_italianskii_cocktail/).`,
     image: '/images/tours/custom-route.webp',
+    imageAlt: 'Индивидуальный маршрут по Кампании — Казерта, Пестум, Капуя, Беневенто и скрытые жемчужины',
+    priceEUR: 100,
+    keywords: ['Казерта экскурсия', 'Беневенто экскурсия', 'индивидуальный маршрут Кампания', 'нестандартный маршрут Италия'],
   },
   {
     id: 'consultation',
@@ -549,6 +647,9 @@ export const tours: Tour[] = [
 • Консультация в Zoom по любому вопросу по вашему путешествию — **40 минут / €40**.
 • Помощь в бронировании жилья, аренде яхты, покупке билетов в музеи — по запросу.`,
     image: '/images/tours/consultation.webp',
+    imageAlt: 'Zoom-консультация по путешествию в Италию — планирование маршрута и помощь с бронированием',
+    priceEUR: 40,
+    keywords: ['консультация путешествие Италия', 'планирование маршрута Кампания', 'помощь с путешествием в Италию'],
   },
 ];
 

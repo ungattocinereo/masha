@@ -1,0 +1,151 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { contacts } from '../data/tours';
+import { iconSvg } from '../lib/icons';
+
+const canonical = 'https://masha.amalfi.day/contact';
+
+const contactSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  url: canonical,
+  about: {
+    '@type': 'TravelAgency',
+    '@id': 'https://masha.amalfi.day/#business',
+    name: 'Маша Шишкова — гид по Кампании',
+    contactPoint: [
+      {
+        '@type': 'ContactPoint',
+        contactType: 'customer service',
+        telephone: '+79219594978',
+        email: contacts.email,
+        availableLanguage: ['Russian', 'English', 'Italian'],
+        contactOption: 'TollFree',
+      },
+    ],
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Maiori',
+      addressRegion: 'Campania',
+      postalCode: '84010',
+      addressCountry: 'IT',
+    },
+  },
+};
+
+const channels = [
+  {
+    label: 'WhatsApp',
+    value: contacts.phone,
+    icon: 'message-circle',
+    href: `https://wa.me/${contacts.whatsappNumber}?text=${encodeURIComponent('Здравствуйте, Маша!')}`,
+    note: 'Самый быстрый способ. Ответ в течение нескольких часов.',
+    accent: 'terra',
+  },
+  {
+    label: 'Telegram',
+    value: contacts.telegramName,
+    icon: 'send',
+    href: contacts.telegram,
+    note: 'Канал @amalfitanskiekanikuly с видео-экскурсиями.',
+    accent: 'azure',
+  },
+  {
+    label: 'Instagram',
+    value: contacts.instagramHandle,
+    icon: 'instagram',
+    href: contacts.instagram,
+    note: 'Сториз и анонсы экскурсий.',
+    accent: 'lemon',
+  },
+  {
+    label: 'Email',
+    value: contacts.email,
+    icon: 'mail',
+    href: `mailto:${contacts.email}`,
+    note: 'Для развёрнутых писем и рабочих вопросов.',
+    accent: 'olive',
+  },
+];
+---
+<Layout
+  title="Контакты · Маша Шишкова — гид по Кампании"
+  description="Связаться с Машей Шишковой: WhatsApp +7 921 959-49-78, Telegram @amalfitanskiekanikuly, email marshishkova@gmail.com. Ответ в течение нескольких часов."
+  canonical={canonical}
+  lang="ru"
+  alternates={[
+    { hreflang: 'ru', href: canonical },
+    { hreflang: 'x-default', href: canonical },
+  ]}
+  jsonLd={[contactSchema]}
+>
+  <article class="contact-page">
+    <div class="container">
+      <Breadcrumbs items={[
+        { name: 'Главная', url: 'https://masha.amalfi.day/' },
+        { name: 'Контакты', url: canonical },
+      ]} />
+
+      <header class="contact-page__head">
+        <p class="kicker">Связь</p>
+        <h1>Как со мной связаться</h1>
+        <p class="contact-page__lead">Любым удобным способом — отвечу обычно в течение нескольких часов. Самый быстрый — WhatsApp.</p>
+      </header>
+
+      <div class="contact-page__grid">
+        {channels.map(c => (
+          <a class={`cc cc--${c.accent}`} href={c.href} target="_blank" rel="noopener">
+            <span class="cc__icon" set:html={iconSvg(c.icon)} />
+            <span class="cc__label">{c.label}</span>
+            <span class="cc__value">{c.value}</span>
+            <span class="cc__note">{c.note}</span>
+          </a>
+        ))}
+      </div>
+
+      <section class="contact-page__where">
+        <h2 class="section-title">Где я работаю</h2>
+        <p>Базируюсь в Майори, Амальфитанское побережье. Провожу экскурсии по всей Кампании: Неаполь, Помпеи, Геркуланум, Везувий, Амальфи, Равелло, Капри, Пестум, Казерта.</p>
+        <p>Готова приехать в место встречи (Сорренто, Салерно, Позитано, Неаполь) или встретиться на месте экскурсии.</p>
+      </section>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .contact-page { padding: 0 0 4rem; }
+  .contact-page__head { text-align: center; margin: 1rem 0 2.5rem; }
+  .contact-page__head h1 { font-family: var(--serif); font-size: clamp(2rem, 1.5rem + 2vw, 3rem); margin: 0.25rem 0 1rem; }
+  .contact-page__lead { max-width: 540px; margin: 0 auto; color: var(--ink-soft); font-size: 1.05rem; }
+
+  .contact-page__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin: 0 0 4rem;
+  }
+  .cc {
+    display: flex; flex-direction: column; gap: 0.4rem;
+    padding: 1.5rem;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    color: var(--ink) !important;
+    text-decoration: none;
+    transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  }
+  .cc:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+  .cc__icon { display: inline-flex; }
+  .cc__icon svg { width: 28px; height: 28px; }
+  .cc--terra .cc__icon svg { color: var(--terra); }
+  .cc--azure .cc__icon svg { color: var(--azure); }
+  .cc--lemon .cc__icon svg { color: var(--lemon); }
+  .cc--olive .cc__icon svg { color: var(--olive); }
+  .cc__label { font-family: var(--serif); font-size: 0.9rem; color: var(--ink-soft); }
+  .cc__value { font-weight: 500; font-size: 1.05rem; }
+  .cc__note { font-size: 0.85rem; color: var(--ink-soft); margin-top: 0.4rem; line-height: 1.4; }
+
+  .contact-page__where { max-width: 700px; margin: 3rem auto 0; }
+  .contact-page__where p { font-family: var(--serif); font-size: 1.1rem; line-height: 1.6; color: var(--ink-soft); }
+</style>

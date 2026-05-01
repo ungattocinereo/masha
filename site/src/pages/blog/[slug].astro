@@ -1,0 +1,205 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import TourCard from '../../components/TourCard.astro';
+import { tours } from '../../data/tours';
+import { iconSvg } from '../../lib/icons';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props { post: CollectionEntry<'blog'>; }
+const { post } = Astro.props as Props;
+const { Content } = await post.render();
+
+const canonical = `https://masha.amalfi.day/blog/${post.slug}`;
+const ogImage = post.data.image ? `https://masha.amalfi.day${post.data.image}` : 'https://masha.amalfi.day/images/bg-hero.webp';
+
+const relatedTours = tours.filter(t =>
+  t.lang !== 'en' && post.data.relatedTours?.includes(t.id)
+);
+
+const formatDate = (d: Date) => {
+  const months = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+};
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  '@id': `${canonical}#article`,
+  headline: post.data.title,
+  description: post.data.description,
+  image: ogImage,
+  url: canonical,
+  datePublished: post.data.pubDate.toISOString(),
+  ...(post.data.updatedDate ? { dateModified: post.data.updatedDate.toISOString() } : { dateModified: post.data.pubDate.toISOString() }),
+  author: {
+    '@type': 'Person',
+    name: 'Маша Шишкова',
+    url: 'https://masha.amalfi.day/about',
+    image: 'https://masha.amalfi.day/images/masha.jpg',
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'Маша Шишкова — гид по Кампании',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://masha.amalfi.day/apple-touch-icon.png',
+    },
+  },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+  keywords: post.data.keywords || post.data.tags.join(', '),
+};
+
+const crumbs = [
+  { name: 'Главная', url: 'https://masha.amalfi.day/' },
+  { name: 'Блог', url: 'https://masha.amalfi.day/blog' },
+  { name: post.data.title, url: canonical },
+];
+---
+<Layout
+  title={`${post.data.title} · Маша Шишкова`}
+  description={post.data.description}
+  canonical={canonical}
+  ogImage={ogImage}
+  ogImageAlt={post.data.imageAlt || post.data.title}
+  ogType="article"
+  lang="ru"
+  alternates={[
+    { hreflang: 'ru', href: canonical },
+    { hreflang: 'x-default', href: canonical },
+  ]}
+  keywords={post.data.keywords}
+  jsonLd={[articleSchema]}
+  preloads={post.data.image ? [{ as: 'image', href: post.data.image, fetchpriority: 'high' }] : []}
+>
+  <article class="post">
+    <div class="container container--narrow">
+      <Breadcrumbs items={crumbs} />
+
+      <header class="post__head">
+        <p class="kicker">{post.data.tags[0] || 'Записки гида'}</p>
+        <h1>{post.data.title}</h1>
+        <p class="post__lede">{post.data.description}</p>
+        <div class="post__meta">
+          <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+          <span>·</span>
+          <a href="/about">Маша Шишкова</a>
+        </div>
+      </header>
+
+      {post.data.image && (
+        <figure class="post__hero">
+          <img src={post.data.image} alt={post.data.imageAlt || post.data.title} width="1200" height="800" fetchpriority="high" />
+        </figure>
+      )}
+
+      <div class="post__body">
+        <Content />
+      </div>
+
+      {post.data.tags.length > 0 && (
+        <div class="post__tags">
+          {post.data.tags.map(t => <span>{t}</span>)}
+        </div>
+      )}
+
+      {relatedTours.length > 0 && (
+        <section class="post__related">
+          <h2 class="section-title section-title--center">Связанные экскурсии</h2>
+          <div class="post__related-grid">
+            {relatedTours.map(t => <TourCard tour={t} lang="ru" />)}
+          </div>
+        </section>
+      )}
+
+      <section class="post__cta">
+        <h2 class="section-title section-title--center">Помочь спланировать?</h2>
+        <p>Если хотите, чтобы я построила маршрут под ваши даты и интересы — пишите. Отвечаю в течение нескольких часов.</p>
+        <a class="btn btn--primary btn--lg" href={`https://wa.me/79219594978?text=${encodeURIComponent('Здравствуйте, Маша!')}`} target="_blank" rel="noopener">
+          <span set:html={iconSvg('message-circle')} />
+          <span>Написать в WhatsApp</span>
+        </a>
+      </section>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .post { padding: 0 0 4rem; }
+  .container--narrow { max-width: 760px; }
+
+  .post__head { text-align: center; margin: 1.5rem 0 2rem; }
+  .post__head h1 {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 1.5rem + 2vw, 3rem);
+    line-height: 1.15;
+    margin: 0.5rem 0 1rem;
+  }
+  .post__lede { font-family: var(--serif); font-style: italic; font-size: 1.2rem; color: var(--ink-soft); margin: 0 0 1rem; }
+  .post__meta { display: flex; justify-content: center; gap: 0.5rem; font-size: 0.9rem; color: var(--ink-soft); }
+  .post__meta a { color: var(--ink-soft); }
+  .post__meta a:hover { color: var(--terra); }
+
+  .post__hero { margin: 0 0 2rem; border-radius: 1rem; overflow: hidden; aspect-ratio: 16/9; }
+  .post__hero img { width: 100%; height: 100%; object-fit: cover; }
+
+  .post__body { font-family: var(--serif); font-size: 1.15rem; line-height: 1.7; color: var(--ink); }
+  .post__body :global(h2) { font-family: var(--serif); font-size: 1.7rem; color: var(--terra); margin: 2.5rem 0 1rem; line-height: 1.2; }
+  .post__body :global(h3) { font-family: var(--serif); font-size: 1.3rem; color: var(--ink); margin: 1.75rem 0 0.75rem; }
+  .post__body :global(p) { margin: 0 0 1.1rem; }
+  .post__body :global(ul), .post__body :global(ol) { padding-left: 1.5rem; margin: 0 0 1.1rem; }
+  .post__body :global(li) { margin-bottom: 0.4rem; }
+  .post__body :global(strong) { color: var(--ink); font-weight: 600; }
+  .post__body :global(blockquote) {
+    border-left: 3px solid var(--lemon);
+    padding: 0.5rem 0 0.5rem 1.25rem;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin: 1.5rem 0;
+  }
+  .post__body :global(table) {
+    border-collapse: collapse; margin: 1.5rem 0; width: 100%;
+    font-family: var(--sans); font-size: 0.95rem;
+  }
+  .post__body :global(th), .post__body :global(td) {
+    text-align: left; padding: 0.6rem 0.85rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .post__body :global(th) { background: var(--cream-light); font-weight: 600; }
+  .post__body :global(a) { color: var(--azure); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  .post__body :global(a:hover) { color: var(--terra); }
+
+  .post__tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 2rem 0; }
+  .post__tags span {
+    font-size: 0.8rem; color: var(--terra);
+    background: rgba(196, 98, 45, 0.08);
+    padding: 0.3rem 0.65rem; border-radius: 999px;
+  }
+
+  .post__related { margin: 4rem 0 3rem; }
+  .post__related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .post__cta {
+    text-align: center;
+    background: linear-gradient(135deg, var(--azure-deep), var(--azure));
+    color: #fff;
+    border-radius: 1.25rem;
+    padding: 2.5rem clamp(1.5rem, 4vw, 3rem);
+    margin: 3rem 0 1rem;
+  }
+  .post__cta .section-title { color: #fff; }
+  .post__cta p { max-width: 480px; margin: 0 auto 1.5rem; opacity: 0.9; }
+  .post__cta .btn svg { width: 18px; height: 18px; }
+</style>

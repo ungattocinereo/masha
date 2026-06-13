@@ -17,6 +17,7 @@ const catColor = colorForCategory(tour.category);
 const slug = tour.slug || tour.id;
 const href = tour.externalUrl || (lang === 'en' ? `/en/tours/${slug}` : `/tours/${slug}`);
 const isExternal = !!tour.externalUrl;
+const extraLabel = lang === 'en' ? 'Extra' : 'Дополнительно';
 ---
 <article class="tc">
   <a class="tc__media" href={href} {...(isExternal ? { target: '_blank', rel: 'noopener' } : {})}>
@@ -34,7 +35,7 @@ const isExternal = !!tour.externalUrl;
     <p class="tc__desc">{tour.description}</p>
     <div class="tc__meta">
       <span><span class="tc__meta-icon" set:html={iconSvg('clock')} /> {tour.duration}</span>
-      {tour.maxPeople && <span><span class="tc__meta-icon" set:html={iconSvg('users')} /> {tour.maxPeople}</span>}
+      {tour.cardExtra && <span><span class="tc__meta-icon" set:html={iconSvg('sparkles')} /> {extraLabel}: {tour.cardExtra}</span>}
     </div>
     <div class="tc__foot">
       <span class="tc__price">{tour.price}</span>

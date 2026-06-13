@@ -111,7 +111,7 @@ const qrSrc = '/images/ministry-qr.svg';
   <meta name="twitter:image:alt" content="Амальфитанское побережье — экскурсии с Машей Шишковой" />
 
   <!-- Keywords (Yandex still respects this) -->
-  <meta name="keywords" content="гид в Неаполе, гид в Амальфи, экскурсии Помпеи, гид Равелло, экскурсии Капри, экскурсия Геркуланум, лицензированный гид Кампания, русскоязычный гид Италия, Маша Шишкова, квесты для детей Помпеи, гастротур Неаполь, морская прогулка Амальфи, восхождение Везувий, мастер-класс моцарелла, Пестум экскурсия, индивидуальный маршрут Италия" />
+  <meta name="keywords" content="Гид в Неаполе и на Амальфитанском побережье, гид в Неаполе, гид на Амальфитанском побережье, экскурсии Помпеи, гид Равелло, экскурсии Капри, экскурсия Геркуланум, лицензированный гид Кампания, русскоязычный гид Италия, Маша Шишкова, квесты для детей Помпеи, гастротур Неаполь, морская прогулка Амальфи, восхождение Везувий, мастер-класс моцарелла, Пестум экскурсия, индивидуальный маршрут Италия" />
 
   <!-- Structured Data: JSON-LD -->
   <script type="application/ld+json" set:html={JSON.stringify({
@@ -153,7 +153,7 @@ const qrSrc = '/images/ministry-qr.svg';
     "offers": {
       "@type": "AggregateOffer",
       "priceCurrency": "EUR",
-      "lowPrice": "40",
+      "lowPrice": "70",
       "highPrice": "1500",
       "offerCount": tours.length.toString()
     },
@@ -180,7 +180,7 @@ const qrSrc = '/images/ministry-qr.svg';
     "@type": "TravelAgency",
     "@id": "https://masha.amalfi.day/#business",
     "name": "Маша Шишкова — гид по Кампании",
-    "alternateName": ["Masha Shishkova Guide", "Маша Шишкова гид Амальфи"],
+    "alternateName": ["Masha Shishkova Guide", "Маша Шишкова гид на Амальфитанском побережье"],
     "description": "Лицензированный гид по Неаполю, Помпеям, Геркулануму, Амальфитанскому побережью, Равелло и Капри. Авторские экскурсии, квесты для детей, гастротуры, морские прогулки.",
     "url": "https://masha.amalfi.day/",
     "image": [
@@ -190,7 +190,7 @@ const qrSrc = '/images/ministry-qr.svg';
     "logo": "https://masha.amalfi.day/apple-touch-icon.png",
     "telephone": "+79219594978",
     "email": contacts.email,
-    "priceRange": "€40–€1500",
+    "priceRange": "от €70",
     "currenciesAccepted": "EUR",
     "paymentAccepted": "Cash, Bank Transfer",
     "address": {
@@ -332,7 +332,7 @@ const qrSrc = '/images/ministry-qr.svg';
         "name": "Что делать, если я ещё не в Италии?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Можно начать с серии видео-экскурсий «На диване» в Telegram-канале @amalfitanskiekanikuly — бесплатно. Также доступна Zoom-консультация по планированию путешествия за €40."
+          "text": "Можно начать с серии видео-экскурсий «На диване» в Telegram-канале @amalfitanskiekanikuly — бесплатно. Также доступна Zoom-консультация по планированию путешествия за €70."
         }
       }
     ]
@@ -624,10 +624,10 @@ const qrSrc = '/images/ministry-qr.svg';
                     <span class="icon icon--xs" set:html={iconSvg('clock')} />
                     {tour.duration}
                   </span>
-                  {tour.maxPeople && (
+                  {tour.cardExtra && (
                     <span class="card__meta-item">
-                      <span class="icon icon--xs" set:html={iconSvg('users')} />
-                      {tour.maxPeople}
+                      <span class="icon icon--xs" set:html={iconSvg('sparkles')} />
+                      Дополнительно: {tour.cardExtra}
                     </span>
                   )}
                 </div>
@@ -679,10 +679,10 @@ const qrSrc = '/images/ministry-qr.svg';
                 <span class="icon icon--xs" set:html={iconSvg('clock')} />
                 {enTour.duration}
               </span>
-              {enTour.maxPeople && (
+              {enTour.cardExtra && (
                 <span class="tour-feature__meta-item">
-                  <span class="icon icon--xs" set:html={iconSvg('users')} />
-                  {enTour.maxPeople}
+                  <span class="icon icon--xs" set:html={iconSvg('sparkles')} />
+                  Extra: {enTour.cardExtra}
                 </span>
               )}
             </div>
@@ -945,7 +945,7 @@ const qrSrc = '/images/ministry-qr.svg';
   </dialog>
 
   <!-- ============ SCRIPTS ============ -->
-  <script is:inline define:vars={{ whatsappNumber: contacts.whatsappNumber, toursData: ruTours.concat(enTours), clockSvg: iconSvg('clock', { size: 16 }), usersSvg: iconSvg('users', { size: 16 }) }}>
+  <script is:inline define:vars={{ whatsappNumber: contacts.whatsappNumber, toursData: ruTours.concat(enTours), clockSvg: iconSvg('clock', { size: 16 }), extraSvg: iconSvg('sparkles', { size: 16 }) }}>
     // ====== WhatsApp URL builder ======
     function toWhatsApp({ name, tour, note, prefix }) {
       const lines = [
@@ -1042,9 +1042,10 @@ const qrSrc = '/images/ministry-qr.svg';
       mKicker.textContent = '';
       mTitle.textContent = tour.title;
       mSubtitle.textContent = tour.subtitle || '';
+      const extraLabel = tour.lang === 'en' ? 'Extra:' : 'Дополнительно:';
       mMeta.innerHTML = [
         tour.duration && `<span class="modal__meta-item">${clockSvg} ${tour.duration}</span>`,
-        tour.maxPeople && `<span class="modal__meta-item">${usersSvg} ${tour.maxPeople}</span>`,
+        tour.cardExtra && `<span class="modal__meta-item">${extraSvg} ${extraLabel} ${tour.cardExtra}</span>`,
       ].filter(Boolean).join('');
       mLong.innerHTML = mdToHtml(tour.longDescription || tour.description);
       mExtras.textContent = tour.extras || '';
